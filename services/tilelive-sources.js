@@ -18,13 +18,16 @@ module.exports = {
 
   getSource: function(layer_id){
       var _this = this;
-    return new Promise(function(fulfill){
+    return new Promise(function(fulfill, reject){
      var source = _this.sources['layer-' + layer_id];
      if(!source){
        //this will dynamically register new layers on this server the first time they are requested
-       this.loadSource(layer_id)
-       .then(function(source){
+       return _this.loadSource(layer_id)
+       .then(function(){
+           var source = _this.sources['layer-' + layer_id];
          fulfill(source);
+       }).catch(function(err){
+           reject(err);
        });
      }else{
        fulfill(source);

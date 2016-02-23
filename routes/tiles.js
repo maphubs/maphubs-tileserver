@@ -53,8 +53,8 @@ module.exports = function(app) {
   app.get('/tiles/layer/:layerid(\\d+)/index.json', function(req, res, next) {
 
     var layer_id = parseInt(req.params.layerid);
-
-    Sources.getInfo(layer_id)
+    try{
+        Sources.getInfo(layer_id)
     .then(function(info){
       var tilePath = "/{z}/{x}/{y}.{format}";
       var uri = "http://" + req.headers.host +
@@ -66,6 +66,10 @@ module.exports = function(app) {
 
       return res.status(200).send(info);
     }).catch(nextError(next));
+    }catch(err){
+        next(err);
+    }
+    
   });
 
 };

@@ -13,7 +13,7 @@ var _ = require("underscore"),
     var Layer = require('../models/layer');
     var debug = require('./debug')('MaphubsSource');
     var local = require('../local');
-    //var log = require('./log');
+    var log = require('./log');
 
 var tm = {};
 
@@ -160,6 +160,9 @@ var getLayerSource = function(layer_id){
 
   return Layer.getLayerByID(layer_id)
       .then(function(layer){
+          if(layer == null){
+              throw new Error("Layer not Found: " + layer_id);
+          }
           var layerDef  = JSON.parse(JSON.stringify(layerTemplate));
         var tableName = 'layers.';
         if(layer.data_type == 'point'){
@@ -220,6 +223,8 @@ var MaphubsSource = function(uri, callback) {
              return Bridge.call(self, uri, callback);
            });
 
+         }).catch(function(err){
+             return callback(err);
          });
   }else{
     return callback(new Error('Source type not supported: ' + uri.host));
