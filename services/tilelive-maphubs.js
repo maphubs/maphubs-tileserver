@@ -1,7 +1,6 @@
 //Modified from tilelive-tmsource https://github.com/mojodna/tilelive-tmsource
 "use strict";
-var path = require("path"),
-    url = require("url"),
+var url = require("url"),
     util = require("util");
 
 var _ = require("underscore"),
@@ -14,7 +13,7 @@ var _ = require("underscore"),
     var Layer = require('../models/layer');
     var debug = require('./debug')('MaphubsSource');
     var local = require('../local');
-    var log = require('./log');
+    //var log = require('./log');
 
 var tm = {};
 

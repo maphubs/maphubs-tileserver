@@ -1,12 +1,10 @@
-
 var log = require('./log.js');
 var Layer = require('../models/layer');
 
 var debug = require('./debug')('tilelive-sources');
 
 var tilelive = require("tilelive");
-var MaphubsSource = require('./tilelive-maphubs')(tilelive);
-
+require('./tilelive-maphubs')(tilelive);
 
 var cache = require("tilelive-cache")(tilelive, {
   size: 10,      // 10MB cache (the default)
@@ -15,30 +13,52 @@ var cache = require("tilelive-cache")(tilelive, {
                  // composed sources
 });
 
-
-
 module.exports = {
   sources: {},
+
+  getSource: function(layer_id){
+      var _this = this;
+    return new Promise(function(fulfill){
+     var source = _this.sources['layer-' + layer_id];
+     if(!source){
+       //this will dynamically register new layers on this server the first time they are requested
+       this.loadSource(layer_id)
+       .then(function(source){
+         fulfill(source);
+       });
+     }else{
+       fulfill(source);
+    }
+   });
+  },
 
   loadSource: function(layer_id){
     debug('loadSource: ' + layer_id);
     var _this = this;
     //add a source for the requested layer
-    return cache.load('maphubs://layer/' + layer_id, function(err, source) {
-      if(err){
-        log.error(err);
-      }else{
-        log.info('Loaded Source for layer ID: ' + layer_id);
-        _this.sources['layer-' + layer_id] = source;
-      }
+    return Layer.getLayerByID(layer_id)
+    .then(function(layer){
+      return new Promise(function(fulfill, reject){
+        return cache.load('maphubs://layer/' + layer_id, function(err, source) {
+          if(err){
+            //log.error(err);
+            reject(err);
+          }else{
+            log.info('Loaded Source for layer ID: ' + layer_id);
+            _this.sources['layer-' + layer_id] = {source: source, updated: layer.last_updated};
+            fulfill(source);
+          }
+        });
+      });
     });
   },
 
   removeSource: function(layer_id){
+    var _this = this;
     debug('removeSource: ' + layer_id);
     return new Promise(function(fulfill){
-      if(this.sources['layer-' + layer_id]){
-        delete this.sources['layer-' + layer_id];
+      if(_this.sources['layer-' + layer_id]){
+        delete _this.sources['layer-' + layer_id];
       }
       fulfill();
     });
@@ -60,42 +80,73 @@ module.exports = {
     Layer.getAllLayerIDs()
         .then(function(result){
           result.forEach(function(layer){
-              var layer_id = parseInt(layer.layer_id)
-            return _this.loadSource(layer_id);
+            var layer_id = parseInt(layer.layer_id);
+            return _this.loadSource(layer_id).
+            then(function(){
+                  //warm the cache
+                 return cache.load('maphubs://layer/' + layer.layer_id);
+            })
+            .catch(function(err){
+                log.error(err.message);
+            });
           });
+        }).catch(function(err){
+            log.error(err.message);
         });
   },
 
-  getInfo: function(layer_id, callback){
-    var source = this.sources['layer-' + layer_id];
-    if(!source){
-      callback(new Error('Source not found for: ' + layer_id));
-    }else{
-      return source.getInfo(function(err, _info) {
-    if (err) {
-      return callback(err);
-    }
+  getInfoHelper: function(source, layer){
+    return new Promise(function(fulfill, reject){
+      source.getInfo(function(err, _info) {
+       if (err) {
+         return reject(err);
+       }
 
-    var info = {};
+       var info = {};
 
-    Object.keys(_info).forEach(function(key) {
-      info[key] = _info[key];
+       Object.keys(_info).forEach(function(key) {
+         info[key] = _info[key];
+       });
+
+       if (info.vector_layers) {
+         info.format = "pbf";
+       }
+
+       info.layer_id = layer.layer_id;
+       info.updated = layer.last_updated;
+       info.name = info.name || "Untitled";
+       info.center = info.center || [-122.4440, 37.7908, 12];
+       info.bounds = info.bounds || [-180, -85.0511, 180, 85.0511];
+       info.format = "pbf";
+       info.minzoom = Math.max(0, info.minzoom | 0);
+       info.maxzoom = info.maxzoom || Infinity;
+       info.group_id = layer.owned_by_group_id;
+
+       fulfill(info);
+     });
+   });
+  },
+
+  getInfo: function(layer_id){
+    var _this = this;
+    return Layer.getLayerByID(layer_id)
+    .then(function(layer){
+      return _this.getSource(layer_id)
+      .then(function(result){
+        var source = result.source;
+
+        //check if layer has been updated
+        var updated = result.updated;
+        if(layer.last_updated > updated){
+          return _this.restartSource(layer_id)
+          .then(function(newSource){
+            return _this.getInfoHelper(newSource, layer);
+          });
+        }else{
+          return _this.getInfoHelper(source, layer);
+        }
+      });
     });
-
-    if (info.vector_layers) {
-      info.format = "pbf";
-    }
-
-    info.name = info.name || "Untitled";
-    info.center = info.center || [-122.4440, 37.7908, 12];
-    info.bounds = info.bounds || [-180, -85.0511, 180, 85.0511];
-    info.format = "pbf";
-    info.minzoom = Math.max(0, info.minzoom | 0);
-    info.maxzoom = info.maxzoom || Infinity;
-
-    return callback(null, info);
-  });
-    }
   }
 
 };

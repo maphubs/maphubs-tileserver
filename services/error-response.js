@@ -6,6 +6,13 @@ module.exports = {
       log.error(err);
       res.status(code).send({success: false,error: err.toString()});
     };
+  },
+
+  nextError: function(next){
+    return function(err){
+      log.error(err);
+      next(err);
+    };
   }
 
 
