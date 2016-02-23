@@ -1,5 +1,4 @@
 /* @flow weak */
-var Layer = require('../models/layer');
 var log = require('../services/log.js');
 
 var path = require("path");
@@ -57,7 +56,13 @@ module.exports = function(app) {
         Sources.getInfo(layer_id)
     .then(function(info){
       var tilePath = "/{z}/{x}/{y}.{format}";
-      var uri = "http://" + req.headers.host +
+      
+      var uri = "http://";
+      if(process.env.USE_HTTPS){
+          uri = "https://";
+      }
+      
+      uri += req.headers.host +
         (path.dirname(req.originalUrl) +
                        tilePath.replace("{format}",'pbf')).replace(/\/+/g, "/");
 
