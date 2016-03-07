@@ -5,7 +5,7 @@
   "Layer": [{
     "id": "data",
     "Datasource": {
-      "dbname": "openmaphub",
+      "dbname": "maphubs",
       "extent": "-21000000,-11000000,21000000,11000000",
       "geometry_field": "",
       "geometry_table": "",

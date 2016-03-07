@@ -14,34 +14,34 @@ RUN apt-get install -y nodejs
 RUN npm install -g npm && npm install pm2 -g
 
 #create non-root user
-RUN useradd -s /bin/bash -m -d /home/openmaphub -c "openmaphub" openmaphub && chown -R openmaphub:openmaphub /home/openmaphub
+RUN useradd -s /bin/bash -m -d /home/maphubs -c "maphubs" maphubs && chown -R maphubs:maphubs /home/maphubs
 
 #switch over and do everything else as the non-priledged user
-USER openmaphub
+USER maphubs
 
-RUN mkdir -p /home/openmaphub/app
-WORKDIR /home/openmaphub/app
+RUN mkdir -p /home/maphubs/app
+WORKDIR /home/maphubs/app
 
-COPY package.json /home/openmaphub/app/package.json
+COPY package.json /home/maphubs/app/package.json
 RUN npm install
 
 
 USER root
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-COPY . /home/openmaphub/app
-RUN chown -R openmaphub:openmaphub /home/openmaphub/app
-RUN chmod +x /home/openmaphub/app/docker-entrypoint.sh
+COPY . /home/maphubs/app
+RUN chown -R maphubs:maphubs /home/maphubs/app
+RUN chmod +x /home/maphubs/app/docker-entrypoint.sh
 
 #copy environment specific config file
-COPY env/deploy_local.js  /home/openmaphub/app/local.js
-RUN chown openmaphub:openmaphub /home/openmaphub/app/local.js
+COPY env/deploy_local.js  /home/maphubs/app/local.js
+RUN chown maphubs:maphubs /home/maphubs/app/local.js
 
 
 #build client-side files
-USER openmaphub
+USER maphubs
 
 EXPOSE 4001
 ENV NODE_ENV production
 
 ENV DEBUG *,-express:*,-morgan,-tessera,-pool2,-knex:*,-pm2:*
-CMD /home/openmaphub/app/docker-entrypoint.sh
+CMD /home/maphubs/app/docker-entrypoint.sh
