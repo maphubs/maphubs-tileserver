@@ -60,8 +60,15 @@ module.exports = {
     var _this = this;
     debug('removeSource: ' + layer_id);
     return new Promise(function(fulfill){
-      if(_this.sources['layer-' + layer_id]){
-        delete _this.sources['layer-' + layer_id];
+      var source = _this.sources['layer-' + layer_id];
+      if(source){
+        if(source.close){
+          source.close(function(){
+            delete _this.sources['layer-' + layer_id];
+          });
+        }else{
+          delete _this.sources['layer-' + layer_id];
+        }
       }
       fulfill();
     });
@@ -69,7 +76,7 @@ module.exports = {
 
   //restart source to update it and clear cache
   restartSource: function(layer_id){
-    debug('restartSource: ' + layer_id);
+    log.info('restartSource: ' + layer_id);
     var _this = this;
     return this.removeSource(layer_id)
     .then(function(){
