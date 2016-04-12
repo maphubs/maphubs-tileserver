@@ -1,5 +1,5 @@
 var knex = require('../connection.js');
-var _ = require('lodash');
+var _find = require('lodash.find');
 var debug = require('../services/debug')('layer');
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
       .then(function(layer){
            return _this.getGroupMembers(layer.owned_by_group_id)
           .then(function(users){
-            if(_.find(users, {id: user_id}) !== undefined){
+            if(_find(users, {id: user_id}) !== undefined){
               return true;
             }
             return false;
