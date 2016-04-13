@@ -1,5 +1,4 @@
 var knex = require('../connection.js');
-var _find = require('lodash.find');
 var debug = require('../services/debug')('layer');
 
 module.exports = {
@@ -21,27 +20,10 @@ module.exports = {
   },
 
   getAllLayerIDs: function(){
-    return knex('omh.layers').select('layer_id');
-  },
+    return knex('omh.layers').select('layer_id').where({is_external: false});
+  }
 
-  getGroupMembers: function(group_id) {
-    return knex.select('public.users.id', 'public.users.display_name', 'public.users.email', 'omh.group_memberships.role').from('omh.group_memberships')
-      .leftJoin('public.users', 'omh.group_memberships.user_id', 'public.users.id')
-      .where('omh.group_memberships.group_id', group_id);
-  },
 
-  allowedToModify: function(layer_id, user_id){
-    var _this = this;
-    return this.getLayerByID(layer_id)
-      .then(function(layer){
-           return _this.getGroupMembers(layer.owned_by_group_id)
-          .then(function(users){
-            if(_find(users, {id: user_id}) !== undefined){
-              return true;
-            }
-            return false;
-          });
-      });
-    }
+
 
 };
