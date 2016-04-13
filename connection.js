@@ -8,7 +8,7 @@ var knex = require('knex')({
     // These are the default settings for PG sql that knex sets.
     // Change these if we get connection pool errors.
     min: 2,
-    max: 10
+    max: 100
   }
 });
 
