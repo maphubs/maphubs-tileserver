@@ -1,5 +1,6 @@
 var log = require('./log.js');
 var Layer = require('../models/layer');
+var Promise = require('bluebird');
 
 var debug = require('./debug')('tilelive-sources');
 
@@ -7,8 +8,8 @@ var tilelive = require("tilelive");
 require('./tilelive-maphubs')(tilelive);
 
 var cache = require("tilelive-cache")(tilelive, {
-  size: 10,      // 10MB cache (the default)
-  sources: 100    // cache a maximum of 6 sources (the default); you may
+  size: 5,      // 10MB cache (the default)
+  sources: 250    // cache a maximum of 6 sources (the default); you may
                  // need to change this if you're using lots of
                  // composed sources
 });
