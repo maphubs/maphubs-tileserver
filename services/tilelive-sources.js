@@ -65,13 +65,17 @@ module.exports = {
       if(source){
         if(source.close){
           source.close(function(){
+              debug('closed source for layer_id: ' + layer_id);
             delete _this.sources['layer-' + layer_id];
+            fulfill();
           });
         }else{
           delete _this.sources['layer-' + layer_id];
+          fulfill();
         }
+      }else{
+        fulfill();
       }
-      fulfill();
     });
   },
 
