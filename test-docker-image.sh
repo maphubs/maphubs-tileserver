@@ -11,7 +11,8 @@ docker run --name maphubs-tileserver -p 4001:4001 -d \
 -e OMH_INTERNAL_PORT=4001 \
 -e DB_USER=maphubs \
 -e DB_PASS=maphubs \
--e DB_HOST=192.168.59.100 \
+-e DB_HOST=maphubs-db \
 -e DB_PORT=5432 \
 -e DB_DATABASE=maphubs \
+--link=maphubs-db:maphubs-db \
 maphubs-tileserver
