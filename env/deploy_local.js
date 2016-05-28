@@ -5,6 +5,9 @@ module.exports = {
   host: process.env.OMH_HOST ? process.env.OMH_HOST : process.env.TUTUM_SERVICE_FQDN,
   port: process.env.OMH_PORT,
   internal_port: process.env.OMH_INTERNAL_PORT,
+  NEWRELIC_APP_NAME: process.env.OMH_NEWRELIC_APP_NAME,
+  NEWRELIC_LICENSE: process.env.OMH_NEWRELIC_LICENSE,
+  NEWRELIC_LOG_LEVEL: process.env.OMH_NEWRELIC_LOG_LEVEL,
   database: {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
