@@ -43,7 +43,8 @@ module.exports = {
     return Layer.getLayerByID(layer_id)
     .then(function(layer){
       return new Promise(function(fulfill, reject){
-        return cache.load('maphubs://layer/' + layer_id, function(err, source) {
+        //adding last_updated to the tilelive URI to bust the cache when a layer updates
+        return cache.load('maphubs://layer/' + layer_id + '/' + layer.last_updated, function(err, source) {
           if(err){
             //log.error(err);
             reject(err);
@@ -153,6 +154,7 @@ module.exports = {
         //check if layer has been updated
         var updated = result.updated;
         if(layer.last_updated > updated){
+          log.info('Reloading Updated Layer: ' + layer_id);
           return _this.restartSource(layer_id)
           .then(function(newSource){
             return _this.getInfoHelper(newSource, layer);
