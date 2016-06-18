@@ -163,7 +163,7 @@ var getLayerSource = function(layer_id){
           if(layer == null){
               throw new Error("Layer not Found: " + layer_id);
           }
-          var layerDef  = JSON.parse(JSON.stringify(layerTemplate));
+        var layerDef  = JSON.parse(JSON.stringify(layerTemplate));
         var tableName = 'layers.';
         if(layer.data_type == 'point'){
           tableName += 'points';
@@ -171,20 +171,38 @@ var getLayerSource = function(layer_id){
           tableName += 'lines';
         } else if (layer.data_type == 'polygon'){
           tableName += 'polygons';
+          //add a centroids layer
+          layerDef.Layer.push(JSON.parse(JSON.stringify(layerDef.Layer[0])));
         } else {
           var msg = "layer data type not set";
           debug(msg);
         }
         tableName += '_' + layer.layer_id;
+
+        layerDef.name = layer.name; 
+        layerDef.description = layer.description;
+        layerDef.attribution = layer.source;
+
+        //main data layer
         layerDef.Layer[0].Datasource.host = local.database.host;
         layerDef.Layer[0].Datasource.dbname = local.database.database;
         layerDef.Layer[0].Datasource.user = local.database.user;
         layerDef.Layer[0].Datasource.password = local.database.password;
         layerDef.Layer[0].Datasource.table = tableName;
-        layerDef.name = layer.name;
         layerDef.Layer[0].description = layer.name;
-        layerDef.description = layer.description;
-        layerDef.attribution = layer.source;
+
+        //if polygon also add a centroid layer for labels
+        if (layer.data_type == 'polygon'){
+          layerDef.Layer[1].id = 'data-centroids';
+          layerDef.Layer[1].Datasource.host = local.database.host;
+          layerDef.Layer[1].Datasource.dbname = local.database.database;
+          layerDef.Layer[1].Datasource.user = local.database.user;
+          layerDef.Layer[1].Datasource.password = local.database.password;
+          layerDef.Layer[1].Datasource.geometry_field = 'centroid';
+          layerDef.Layer[1].Datasource.geometry_table = '(select st_centroid(geom) as centroid, * from ' + tableName + ') data';
+          layerDef.Layer[1].Datasource.table = '(select st_centroid(geom) as centroid, * from ' + tableName + ') data';
+          layerDef.Layer[1].description = layer.name + ' Centroids';
+        }
         if(layer.extent_bbox){
           layerDef.bounds = layer.extent_bbox;
         }

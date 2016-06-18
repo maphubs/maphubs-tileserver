@@ -2,7 +2,6 @@ require('newrelic');
 var express = require('express');
 var load = require('express-load');
 var logger = require('morgan');
-var knex = require('./connection.js');
 var log = require('./services/log.js');
 var responseTime = require("response-time");
 var local = require('./local');
