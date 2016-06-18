@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM ubuntu:16.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -6,11 +6,13 @@ ENV DEBIAN_FRONTEND noninteractive
 MAINTAINER Kristofor Carle - Moabi <kristoforcarle@moabi.org>
 
 #update and install basics
-RUN apt-get update && apt-get install -y wget git curl libssl-dev openssl nano unzip python build-essential g++ gdal-bin
+RUN apt-get update && apt-get install -y wget git curl libssl-dev openssl python build-essential g++ libpq-dev \
+&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #install node, npm, pm2
 RUN curl -sL https://deb.nodesource.com/setup_4.x | bash
-RUN apt-get install -y nodejs
+RUN apt-get install -y nodejs \
+&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN npm install -g npm && npm install pm2 -g
 
 #create non-root user
@@ -27,7 +29,6 @@ RUN npm install
 
 
 USER root
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY . /home/maphubs/app
 RUN chown -R maphubs:maphubs /home/maphubs/app
 RUN chmod +x /home/maphubs/app/docker-entrypoint.sh
