@@ -1,3 +1,6 @@
 node_modules
 local.js
 test-docker-image.sh
+temp
+newrelic_agent.log
+npm-debug.log

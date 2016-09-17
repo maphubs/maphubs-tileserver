@@ -1,10 +1,10 @@
-require('newrelic');
+var local = require('./local');
+if(!local.disableTracking) require('newrelic');
 var express = require('express');
 var load = require('express-load');
 var logger = require('morgan');
 var log = require('./services/log.js');
 var responseTime = require("response-time");
-var local = require('./local');
 
 var app = express();
 app.enable('trust proxy');

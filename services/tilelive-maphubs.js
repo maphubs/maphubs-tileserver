@@ -14,6 +14,7 @@ var _ = require("underscore"),
     var debug = require('./debug')('MaphubsSource');
     var local = require('../local');
     var log = require('./log');
+    var fs = require('fs');
 
 var tm = {};
 
@@ -231,9 +232,26 @@ var MaphubsSource = function(uri, callback) {
            var info = layerDefinition;
            info.id = url.format(uri);
            info = normalize(info);
+           if(local.writeDebugData){
+             fs.writeFile(local.tempFilePath + '/mapnik-' + layer_id + '.json', JSON.stringify(info), function(err){
+               if(err) {
+                 log.error(err);
+                 throw err;
+               }
+             });
+           }
+
            return toXML(info, function(err, xml) {
              if (err) {
                return callback(err);
+             }
+             if(local.writeDebugData){
+               fs.writeFile(local.tempFilePath + '/mapnik-' + layer_id + '.xml', xml, function(err){
+                 if(err) {
+                   log.error(err);
+                   throw err;
+                 }
+               });
              }
 
              uri.xml = xml;
