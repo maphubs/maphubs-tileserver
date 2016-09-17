@@ -20,7 +20,7 @@ module.exports = {
   },
 
   getAllLayerIDs: function(){
-    return knex('omh.layers').select('layer_id').where({is_external: false});
+    return knex('omh.layers').select('layer_id').where({is_external: false, remote: false});
   }
 
 
