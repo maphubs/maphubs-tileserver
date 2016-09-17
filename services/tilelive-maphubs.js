@@ -106,6 +106,7 @@ var normalize = function(data) {
     }catch(err){
         //log.error(err);
     }
+    info.fields.maphubs_host = 'String';
     return info;
   });
   return data;
@@ -179,7 +180,7 @@ var getLayerSource = function(layer_id){
         }
         tableName += '_' + layer.layer_id;
 
-        layerDef.name = layer.name; 
+        layerDef.name = layer.name;
         layerDef.description = layer.description;
         layerDef.attribution = layer.source;
 
@@ -188,7 +189,7 @@ var getLayerSource = function(layer_id){
         layerDef.Layer[0].Datasource.dbname = local.database.database;
         layerDef.Layer[0].Datasource.user = local.database.user;
         layerDef.Layer[0].Datasource.password = local.database.password;
-        layerDef.Layer[0].Datasource.table = tableName;
+        layerDef.Layer[0].Datasource.table = '(select \'' + local.host + '\' as maphubs_host, * from ' + tableName + ') data';
         layerDef.Layer[0].description = layer.name;
 
         //if polygon also add a centroid layer for labels
@@ -199,8 +200,8 @@ var getLayerSource = function(layer_id){
           layerDef.Layer[1].Datasource.user = local.database.user;
           layerDef.Layer[1].Datasource.password = local.database.password;
           layerDef.Layer[1].Datasource.geometry_field = 'centroid';
-          layerDef.Layer[1].Datasource.geometry_table = '(select st_centroid(geom) as centroid, * from ' + tableName + ') data';
-          layerDef.Layer[1].Datasource.table = '(select st_centroid(geom) as centroid, * from ' + tableName + ') data';
+          layerDef.Layer[1].Datasource.geometry_table = '(select \'' + local.host + '\' as maphubs_host, st_centroid(geom) as centroid, * from ' + tableName + ') data';
+          layerDef.Layer[1].Datasource.table = '(select \'' + local.host + '\' as maphubs_host, st_centroid(geom) as centroid, * from ' + tableName + ') data';
           layerDef.Layer[1].description = layer.name + ' Centroids';
         }
         if(layer.extent_bbox){
