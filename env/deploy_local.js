@@ -8,9 +8,9 @@ module.exports = {
   NEWRELIC_APP_NAME: process.env.OMH_NEWRELIC_APP_NAME,
   NEWRELIC_LICENSE: process.env.OMH_NEWRELIC_LICENSE,
   NEWRELIC_LOG_LEVEL: process.env.OMH_NEWRELIC_LOG_LEVEL,
-  disableTracking:  process.env.OMH_DISABLE_TRACKING,
-  useHttps: process.env.USE_HTTPS,
-  writeDebugData: process.env.OMH_WRITEDEBUGDATA,
+  disableTracking:  process.env.OMH_DISABLE_TRACKING  == 'true',
+  useHttps: process.env.USE_HTTPS == 'true',
+  writeDebugData: process.env.OMH_WRITEDEBUGDATA == 'true',
   database: {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
