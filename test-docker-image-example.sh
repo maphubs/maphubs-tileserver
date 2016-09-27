@@ -16,6 +16,7 @@ docker run --name maphubs-tileserver -p 4001:4001 -d \
 -e OMH_NEWRELIC_APP_NAME=MapHubs-TileServer-Local-DEV \
 -e OMH_NEWRELIC_LICENSE=1234 \
 -e OMH_NEWRELIC_LOG_LEVEL=info \
+-e USE_HTTPS=false \
 -e NODE_MEM_SIZE=512 \
 -e DB_DATABASE=maphubs \
 --link=maphubs-db:maphubs-db \

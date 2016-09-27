@@ -5,7 +5,7 @@ var Promise = require('bluebird');
 var debug = require('./debug')('tilelive-sources');
 
 var tilelive = require("tilelive");
-require('./tilelive-maphubs')(tilelive);
+require('./tilelive-maphubs2')(tilelive);
 
 var cache = require("tilelive-cache")(tilelive, {
   size: 5,      // 10MB cache (the default)

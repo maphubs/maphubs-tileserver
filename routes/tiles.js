@@ -10,6 +10,8 @@ var Sources = require('../services/tilelive-sources');
 var apiError = require('../services/error-response').apiError;
 var nextError = require('../services/error-response').nextError;
 
+var local = require('../local');
+
 module.exports = function(app) {
 
   Sources.init();
@@ -56,12 +58,12 @@ module.exports = function(app) {
         Sources.getInfo(layer_id)
     .then(function(info){
       var tilePath = "/{z}/{x}/{y}.{format}";
-      
+
       var uri = "http://";
-      if(process.env.USE_HTTPS){
+      if(local.useHttps){
           uri = "https://";
       }
-      
+
       uri += req.headers.host +
         (path.dirname(req.originalUrl) +
                        tilePath.replace("{format}",'pbf')).replace(/\/+/g, "/");
@@ -74,7 +76,7 @@ module.exports = function(app) {
     }catch(err){
         next(err);
     }
-    
+
   });
 
 };

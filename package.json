@@ -11,14 +11,11 @@
   "license": "GPL-3.0",
   "dependencies": {
     "bluebird": "3.4.6",
-    "carto": "0.16.3",
     "compression": "1.6.2",
     "debug": "2.2.0",
     "express": "4.14.0",
     "express-load": "1.1.15",
     "knex": "0.12.1",
-    "mapnik": "3.5.14",
-    "mapnik-reference": "8.5.5",
     "morgan": "1.7.0",
     "newrelic": "^1.29.0",
     "pg": "^6.1.0",
@@ -27,8 +24,8 @@
     "tilelive": "5.12.2",
     "tilelive-bridge": "2.3.1",
     "tilelive-cache": "0.7.1",
-    "underscore": "1.8.3",
-    "winston": "2.2.0"
+    "winston": "2.2.0",
+    "xml": "^1.0.1"
   },
   "devDependencies": {
     "eslint": "3.5.0",
