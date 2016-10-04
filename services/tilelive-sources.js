@@ -3,13 +3,13 @@ var Layer = require('../models/layer');
 var Promise = require('bluebird');
 
 var debug = require('./debug')('tilelive-sources');
-
+var local = require('../local');
 var tilelive = require("tilelive");
 require('./tilelive-maphubs2')(tilelive);
 
 var cache = require("tilelive-cache")(tilelive, {
-  size: 5,      // 10MB cache (the default)
-  sources: 250    // cache a maximum of 6 sources (the default); you may
+  size: local.cacheMemSize ? local.cacheMemSize : 5,      // 10MB cache (the default)
+  sources: local.cacheSources ? local.cacheSources : 250  // cache a maximum of 6 sources (the default); you may
                  // need to change this if you're using lots of
                  // composed sources
 });

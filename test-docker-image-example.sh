@@ -19,5 +19,7 @@ docker run --name maphubs-tileserver -p 4001:4001 -d \
 -e USE_HTTPS=false \
 -e NODE_MEM_SIZE=512 \
 -e DB_DATABASE=maphubs \
+-e OMH_CACHE_MEMSIZE=5 \
+-e OMH_CACHE_SOURCES=300 \
 --link=maphubs-db:maphubs-db \
 maphubs-tileserver
