@@ -38,12 +38,10 @@ module.exports = function(app) {
       return new Promise(function(fulfill, reject){
         source.getTile(z, x, y, function(err, data, headers) {
             if (err) {
-                res.status(404);
-                res.send(err.message);
-                log.error(err.message);
-                reject(err);
-            }
-            if (data == null) {
+              res.status(404);
+              res.send(err.message);
+              reject(err);
+            }else if(data == null) {
               res.status(404).send('Not found');
               fulfill();
             }else {
@@ -54,7 +52,9 @@ module.exports = function(app) {
         });
       });
 
-    }).catch(apiError(res, 500));
+    }).catch(function(err){
+      log.error(err.message);
+    });
   });
 
   app.get('/tiles/layer/:layerid(\\d+)/index.json', function(req, res, next) {
