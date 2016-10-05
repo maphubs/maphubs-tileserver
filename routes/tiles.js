@@ -3,6 +3,8 @@ var log = require('../services/log.js');
 
 var path = require("path");
 
+var Promise = require('bluebird');
+
 //var debug = require('../services/debug')('tiles');
 
 var Sources = require('../services/tilelive-sources');
@@ -33,21 +35,25 @@ module.exports = function(app) {
         res.status(500).send(msg);
         return;
       }
-
-      source.getTile(z, x, y, function(err, data, headers) {
-          if (err) {
-              res.status(404);
-              res.send(err.message);
-              log.error(err.message);
-              return;
-          }
-          if (data == null) {
-            return res.status(404).send('Not found');
-          }else {
-            res.set(headers);
-            return res.status(200).send(data);
-          }
+      return new Promise(function(fulfill, reject){
+        source.getTile(z, x, y, function(err, data, headers) {
+            if (err) {
+                res.status(404);
+                res.send(err.message);
+                log.error(err.message);
+                reject(err);
+            }
+            if (data == null) {
+              res.status(404).send('Not found');
+              fulfill();
+            }else {
+              res.set(headers);
+              res.status(200).send(data);
+              fulfill();
+            }
+        });
       });
+
     }).catch(apiError(res, 500));
   });
 
