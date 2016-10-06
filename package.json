@@ -22,7 +22,7 @@
     "pg-native": "^1.10.0",
     "response-time": "^2.3.1",
     "tilelive": "5.12.2",
-    "tilelive-bridge": "2.3.1",
+    "tilelive-bridge": "mapbox/tilelive-bridge#9b1d7c68703652bca9772f79a49dd18d189794c5",
     "tilelive-cache": "0.7.1",
     "winston": "2.2.0",
     "xml": "^1.0.1"
