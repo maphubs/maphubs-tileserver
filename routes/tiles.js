@@ -53,8 +53,36 @@ module.exports = function(app) {
       });
 
     }).catch(function(err){
-      log.error(err.message);
+      if(err.message == "pool is draining and cannot accept work"){
+        //manually recover from "stuck" sources that were unloaded from the cache
+        log.error(err.message);
+        Sources.restartSource(layer_id)
+        .then(function(source){
+          return new Promise(function(fulfill, reject){
+            source.getTile(z, x, y, function(err, data, headers) {
+                if (err) {
+                  res.status(404);
+                  res.send(err.message);
+                  reject(err);
+                }else if(data == null) {
+                  res.status(404).send('Not found');
+                  fulfill();
+                }else {
+                  res.set(headers);
+                  res.status(200).send(data);
+                  fulfill();
+                }
+            });
+        });
+        }).catch(function(err){
+          log.error("After Second Atempt: " + err.message);
+        });
+      }else{
+        log.error(err.message);
+      }
+
     });
+
   });
 
   app.get('/tiles/layer/:layerid(\\d+)/index.json', function(req, res, next) {
