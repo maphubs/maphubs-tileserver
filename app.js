@@ -5,6 +5,8 @@ var load = require('express-load');
 var logger = require('morgan');
 var log = require('./services/log.js');
 var responseTime = require("response-time");
+var knex = require('./connection.js');
+
 
 var app = express();
 app.enable('trust proxy');
@@ -16,18 +18,68 @@ process.on('uncaughtException', function(err) {
 
 app.use(responseTime());
 
+app.use(logger('dev'));
+var checkLogin;
+if(local.requireLogin){
+    var session = require('express-session');
+    var KnexSessionStore = require('connect-session-knex')(session);
+    var passport = require('passport');
+    //set sessions (Note: putting this below static files to avoid extra overhead)
+    var sessionStore = new KnexSessionStore({
+      /*eslint-disable*/
+      knex: knex,
+      /*eslint-enable*/
+      tablename: 'maphubssessions' // optional. Defaults to 'sessions'
+    });
+
+    app.use(session({
+      key: 'maphubs',
+      secret: local.SESSION_SECRET,
+      store: sessionStore,
+      resave: false,
+      proxy: true,
+      saveUninitialized: false,
+      cookie: {
+            path: '/',
+            domain: local.host
+        }
+    }));
+
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    //load passport auth config
+    require('./services/auth');
+
+   checkLogin = require('./services/manet-check');
+}else{
+  checkLogin = function(req, res, next){
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  };
+}
+app.use(function(req, res, next) {
+  if(req.session){
+    log.info(JSON.stringify(req.session));
+  }else{
+    log.info("session not found");
+  }
+  next();
+});
+
+app.use(checkLogin);
+
+
+
 //CORS
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   next();
 });
-
-app.use(logger('dev'));
 
 //load all route files using express-load
 load('./routes').into(app);

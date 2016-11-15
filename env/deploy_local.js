@@ -19,5 +19,8 @@ module.exports = {
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASS,
     port: process.env.DB_PORT
-  }
+  },
+  requireLogin: process.env.OMH_REQUIRE_LOGIN == 'true',
+  SESSION_SECRET:  process.env.OMH_SESSION_SECRET,
+  manetUrl: process.env.OMH_MANET_URL
 };

@@ -91,16 +91,20 @@ module.exports = function(app) {
     try{
         Sources.getInfo(layer_id)
     .then(function(info){
-      var tilePath = "/{z}/{x}/{y}.{format}";
 
       var uri = "http://";
       if(local.useHttps){
           uri = "https://";
       }
 
-      uri += req.headers.host +
-        (path.dirname(req.originalUrl) +
-                       tilePath.replace("{format}",'pbf')).replace(/\/+/g, "/");
+      uri += req.headers.host;
+
+      if(local.port !== 80){
+        uri += ':' + local.port;
+      }
+
+      uri +=
+        (path.dirname(req.originalUrl) + "/{z}/{x}/{y}.pbf").replace(/\/+/g, "/");
 
       info.tiles = [uri];
       info.tilejson = "2.0.0";
