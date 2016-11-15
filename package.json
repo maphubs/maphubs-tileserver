@@ -12,23 +12,27 @@
   "dependencies": {
     "bluebird": "3.4.6",
     "compression": "1.6.2",
-    "debug": "2.2.0",
+    "connect-ensure-login": "^0.1.1",
+    "connect-session-knex": "^1.3.0",
+    "debug": "^2.3.2",
     "express": "4.14.0",
     "express-load": "1.1.15",
-    "knex": "0.12.1",
+    "express-session": "^1.14.2",
+    "knex": "^0.12.6",
     "morgan": "1.7.0",
     "newrelic": "^1.29.0",
+    "passport": "^0.3.2",
     "pg": "^6.1.0",
     "pg-native": "^1.10.0",
     "response-time": "^2.3.1",
     "tilelive": "5.12.2",
     "tilelive-bridge": "mapbox/tilelive-bridge#9b1d7c68703652bca9772f79a49dd18d189794c5",
     "tilelive-cache": "0.7.1",
-    "winston": "2.2.0",
+    "winston": "^2.3.0",
     "xml": "^1.0.1"
   },
   "devDependencies": {
-    "eslint": "3.5.0",
-    "eslint-plugin-flow-vars": "0.5.0"
+    "eslint": "^3.10.0",
+    "eslint-plugin-flowtype": "^2.25.0"
   }
 }

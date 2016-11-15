@@ -1,34 +1,26 @@
 FROM ubuntu:16.04
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive NODE_ENV=production DEBUG=maphubs:*
 
 #MapHubs - Tile Server
 MAINTAINER Kristofor Carle - MapHubs <kris@maphubs.com>
 
-#update and install basics
-RUN apt-get update && apt-get install -y wget git curl libssl-dev openssl python build-essential g++ libpq-dev \
-&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#install dependencies
+RUN apt-get update && apt-get install -y wget git curl libssl-dev openssl python build-essential g++ libpq-dev && \
+    curl -sL https://deb.nodesource.com/setup_4.x | bash && \
+    apt-get install -y nodejs && \
+    npm install -g yarn && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    mkdir -p /app
 
-#install node, npm, pm2
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash
-RUN apt-get install -y nodejs \
-&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-RUN npm install pm2 -g
-
-RUN mkdir -p /app
 WORKDIR /app
 
-COPY package.json /app/package.json
-RUN npm install
+COPY package.json yarn.lock /app/
+RUN yarn install --production --pure-lockfile
 
 COPY . /app
-RUN chmod +x /app/docker-entrypoint.sh
-
-#copy environment specific config file
-COPY env/deploy_local.js  /app/local.js
+RUN chmod +x /app/docker-entrypoint.sh &&\
+    cp /app/env/deploy_local.js  /app/local.js
 
 EXPOSE 4001
-ENV NODE_ENV production
-
-ENV DEBUG *,-express:*,-morgan,-tessera,-pool2,-knex:*,-pm2:*
 CMD /app/docker-entrypoint.sh
