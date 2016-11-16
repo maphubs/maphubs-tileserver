@@ -9,7 +9,7 @@ MAINTAINER Kristofor Carle - MapHubs <kris@maphubs.com>
 RUN apt-get update && apt-get install -y wget git curl libssl-dev openssl python build-essential g++ libpq-dev && \
     curl -sL https://deb.nodesource.com/setup_4.x | bash && \
     apt-get install -y nodejs && \
-    npm install -g yarn && \
+    npm install -g yarn@0.16.1 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir -p /app
 
