@@ -9,20 +9,38 @@ module.exports = function(req, res, next){
 
     var ip = req.connection.remoteAddress;
     var manetUrl = local.manetUrl;
-    var manetHost = require('url').parse(manetUrl).hostname;
-    require('dns').lookup(manetHost, function(err, addresses) {
-      log.info('valid manet addresses:', addresses);
-      if(!addresses.includes(ip) && !addresses.includes(forwardedIP) ){
+    if(process.env.MANET_1_PORT_8891_TCP_ADDR
+      && process.env.MANET_1_PORT_8891_TCP_ADDR !== ip
+      && process.env.MANET_1_PORT_8891_TCP_ADDR !== forwardedIP){
         log.error('Unauthenticated screenshot request, manet IP does not match');
-        fail = true;
-      }
-      if(fail){
+        res.header('Access-Control-Allow-Origin', local.host);
         return res.status(401).send("Unauthorized");
-      }else{
-        res.header('Access-Control-Allow-Origin', '*');
-        next();
-      }
-    });  
+    }else{
+      var manetHost = require('url').parse(manetUrl).hostname;
+      require('dns').lookup(manetHost, function(err, addresses) {
+        if(err){
+          log.error(err);
+          fail = true;
+        }else if(!Array.isArray(addresses)){
+          log.error("Failed to lookup manet addresses");
+          fail = true;
+        }else{
+          log.info('valid manet addresses:', addresses);
+          if(!addresses.includes(ip) && !addresses.includes(forwardedIP) ){
+            log.error('Unauthenticated screenshot request, manet IP does not match');
+            fail = true;
+          }
+        }
+        if(fail){
+          res.header('Access-Control-Allow-Origin', local.host);
+          return res.status(401).send("Unauthorized");
+        }else{
+          res.header('Access-Control-Allow-Origin', '*');
+          next();
+        }
+      });
+    }
+
   }else{
     res.header('Access-Control-Allow-Origin', local.host);
     next();
