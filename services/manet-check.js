@@ -8,11 +8,14 @@ module.exports = function(req, res, next){
     var forwardedIP = req.headers['x-forwarded-for'];
 
     var ip = req.connection.remoteAddress;
+    log.error('RemoteAddress:' + ip);
+    log.error('x-forwarded-for:' + forwardedIP);
     var manetUrl = local.manetUrl;
-    if(process.env.MANET_1_PORT_8891_TCP_ADDR
-      && process.env.MANET_1_PORT_8891_TCP_ADDR !== ip
-      && process.env.MANET_1_PORT_8891_TCP_ADDR !== forwardedIP){
-        log.error('Unauthenticated screenshot request, manet IP does not match');
+    if(process.env.MANET_PORT_8891_TCP_ADDR
+      && process.env.MANET_PORT_8891_TCP_ADDR !== ip
+      && process.env.MANET_PORT_8891_TCP_ADDR !== forwardedIP){
+        log.error('Unauthenticated screenshot request, manet IP does not match');      
+        log.error('Expected IP:' + process.env.MANET_PORT_8891_TCP_ADDR);
         res.header('Access-Control-Allow-Origin', local.host);
         return res.status(401).send("Unauthorized");
     }else{
