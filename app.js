@@ -22,6 +22,12 @@ app.use(logger('dev'));
 
 app.use(cookieParser());
 var checkLogin;
+
+var restrictCors = false;
+if(local.requireLogin && process.env.NODE_ENV === 'production'){
+  restrictCors = true;
+}
+
 if(local.requireLogin){
 
     var session = require('express-session');
@@ -54,10 +60,9 @@ if(local.requireLogin){
     //load passport auth config
     require('./services/auth');
 
-   checkLogin = require('./services/manet-check')(true, true);
+   checkLogin = require('./services/manet-check')(restrictCors, true);
 }else{
   checkLogin = function(req, res, next){
-    res.header('Access-Control-Allow-Origin', '*');
     next();
   };
 }
@@ -72,10 +77,11 @@ app.use(function(req, res, next) {
 
 app.use(checkLogin);
 
-
-
 //CORS
 app.use(function(req, res, next) {
+  if(!restrictCors){
+    res.header('Access-Control-Allow-Origin', '*');
+  }
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, OPTIONS');
