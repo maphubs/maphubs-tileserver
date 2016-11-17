@@ -6,7 +6,7 @@ var logger = require('morgan');
 var log = require('./services/log.js');
 var responseTime = require("response-time");
 var knex = require('./connection.js');
-
+var cookieParser = require('cookie-parser');
 
 var app = express();
 app.enable('trust proxy');
@@ -19,8 +19,11 @@ process.on('uncaughtException', function(err) {
 app.use(responseTime());
 
 app.use(logger('dev'));
+
+app.use(cookieParser());
 var checkLogin;
 if(local.requireLogin){
+
     var session = require('express-session');
     var KnexSessionStore = require('connect-session-knex')(session);
     var passport = require('passport');
@@ -51,7 +54,7 @@ if(local.requireLogin){
     //load passport auth config
     require('./services/auth');
 
-   checkLogin = require('./services/manet-check');
+   checkLogin = require('./services/manet-check')(true, true);
 }else{
   checkLogin = function(req, res, next){
     res.header('Access-Control-Allow-Origin', '*');
