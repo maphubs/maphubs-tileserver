@@ -56,7 +56,7 @@ module.exports = function(app) {
       if(err.message == "pool is draining and cannot accept work"){
         //manually recover from "stuck" sources that were unloaded from the cache
         log.error(err.message);
-        Sources.restartSource(layer_id)
+        return Sources.restartSource(layer_id)
         .then(function(source){
           return new Promise(function(fulfill, reject){
             source.getTile(z, x, y, function(err, data, headers) {
