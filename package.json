@@ -5,7 +5,12 @@
   "main": "app.js",
   "scripts": {
     "start": "DEBUG=*,-express:*,-babel,-morgan,-pool2,-knex:* node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "changelog": "github_changelog_generator && git add CHANGELOG.md && git commit -m \"update changelog\" && git push",
+    "preversion": "",
+    "version": "",
+    "postversion": "git push && git push --tags && npm run changelog",
+    "deploy-patch": "npm version patch --force -m \"version %s\"",
+    "deploy-minor": "npm version minor --force -m \"version %s\""
   },
   "author": "Kristofor Carle <kris@maphubs.com>",
   "license": "GPL-3.0",
