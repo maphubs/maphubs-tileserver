@@ -85,7 +85,7 @@ var getLayer = function(layer_id){
                   "Datasource": [
                     {"Parameter": { _attr: { "name":"dbname"}, _cdata: local.database.database}},
                     {"Parameter": { _attr: { "name":"extent"}, _cdata: tm.extent['900913']}},
-                    {"Parameter": { _attr: { "name":"geometry_field"}, _cdata: ""}},
+                    {"Parameter": { _attr: { "name":"geometry_field"}, _cdata: "geom"}},
                     {"Parameter": { _attr: { "name":"geometry_table"}, _cdata: ""}},
                     {"Parameter": { _attr: { "name":"host"}, _cdata: local.database.host}},
                     {"Parameter": { _attr: { "name":"max_size"}, _cdata: "256"}},
@@ -121,12 +121,12 @@ var getLayer = function(layer_id){
                   {"Parameter": { _attr: { "name":"dbname"}, _cdata: local.database.database}},
                   {"Parameter": { _attr: { "name":"extent"}, _cdata: tm.extent['900913']}},
                   {"Parameter": { _attr: { "name":"geometry_field"}, _cdata: "centroid"}},
-                  {"Parameter": { _attr: { "name":"geometry_table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, st_centroid(geom) as centroid, * from ' + tableName + ') data'}},
+                  {"Parameter": { _attr: { "name":"geometry_table"}, _cdata: ""}},
                   {"Parameter": { _attr: { "name":"host"}, _cdata: local.database.host}},
                   {"Parameter": { _attr: { "name":"max_size"}, _cdata: "256"}},
                   {"Parameter": { _attr: { "name":"password"}, _cdata:  local.database.password}},
                   {"Parameter": { _attr: { "name":"port"}, _cdata: ""}},
-                  {"Parameter": { _attr: { "name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, st_centroid(geom) as centroid, * from ' + tableName + ') data'}},
+                  {"Parameter": { _attr: { "name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from layers.centroids_' + layer_id + ') data'}},
                   {"Parameter": { _attr: { "name":"type"}, _cdata: "postgis"}},
                   {"Parameter": { _attr: { "name":"user"}, _cdata: local.database.user}}
                 ]

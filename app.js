@@ -69,8 +69,6 @@ if(local.requireLogin){
 app.use(function(req, res, next) {
   if(req.session){
     log.info(JSON.stringify(req.session));
-  }else{
-    log.info("session not found");
   }
   next();
 });
