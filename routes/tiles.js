@@ -99,7 +99,7 @@ module.exports = function(app) {
 
       uri += req.headers.host;
 
-      if(local.port !== 80 && local.port !== '80'){
+      if(local.port !== 80 && local.port !== '80' && !req.headers.host.includes(':')){
         uri += ':' + local.port;
       }
 
