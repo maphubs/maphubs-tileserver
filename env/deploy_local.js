@@ -11,8 +11,8 @@ module.exports = {
   disableTracking:  process.env.OMH_DISABLE_TRACKING  == 'true',
   useHttps: process.env.USE_HTTPS == 'true',
   writeDebugData: process.env.OMH_WRITEDEBUGDATA == 'true',
-  cacheMemSize: process.env.OMH_CACHE_MEMSIZE,
-  cacheSources: process.env.OMH_CACHE_SOURCES,
+  initMaxZoom: process.env.OMH_INIT_MAX_ZOOM,
+  tilePath: process.env.OMH_TILE_PATH,
   database: {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

@@ -25,6 +25,9 @@
     "express-load": "1.1.15",
     "express-session": "^1.14.2",
     "knex": "^0.12.6",
+    "lockfile": "^1.0.3",
+    "mbtiles": "^0.9.0",
+    "mkdirp": "^0.5.1",
     "morgan": "1.7.0",
     "newrelic": "^1.36.0",
     "passport": "^0.3.2",
@@ -33,7 +36,7 @@
     "response-time": "^2.3.2",
     "tilelive": "5.12.2",
     "tilelive-bridge": "mapbox/tilelive-bridge#9b1d7c68703652bca9772f79a49dd18d189794c5",
-    "tilelive-cache": "0.7.1",
+    "tilelive-file": "^0.0.3",
     "winston": "^2.3.0",
     "xml": "^1.0.1"
   },

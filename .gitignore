@@ -4,3 +4,4 @@ test-docker-image.sh
 temp
 newrelic_agent.log
 npm-debug.log
+data
