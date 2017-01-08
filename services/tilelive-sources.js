@@ -1,39 +1,122 @@
 var log = require('./log.js');
 var Layer = require('../models/layer');
 var Promise = require('bluebird');
-
 var debug = require('./debug')('tilelive-sources');
 var local = require('../local');
 var tilelive = require("tilelive");
 require('./tilelive-maphubs2')(tilelive);
-
-var cache = require("tilelive-cache")(tilelive, {
-  size: local.cacheMemSize ? local.cacheMemSize : 5,      // 10MB cache (the default)
-  sources: local.cacheSources ? local.cacheSources : 250  // cache a maximum of 6 sources (the default); you may
-                 // need to change this if you're using lots of
-                 // composed sources
-});
+var fs = require('fs');
+var updateTiles = require('./updateTiles');
+var TILE_PATH = local.tilePath ? local.tilePath : '/data';
+var lockFile = require('lockfile');
 
 module.exports = {
   sources: {},
 
   getSource: function(layer_id){
-      var _this = this;
-    return new Promise(function(fulfill, reject){
-     var source = _this.sources['layer-' + layer_id];
-     if(!source){
+    var _this = this;
+    var source = _this.sources['layer-' + layer_id];
+    if(!source){
        //this will dynamically register new layers on this server the first time they are requested
-       return _this.loadSource(layer_id)
-       .then(function(){
-           var source = _this.sources['layer-' + layer_id];
-         fulfill(source);
-       }).catch(function(err){
-           reject(err);
-       });
-     }else{
-       fulfill(source);
+      return _this.loadSource(layer_id)
+      .then(function(){
+          var source = _this.sources['layer-' + layer_id];
+          return source;
+      });
+    }else{
+      return Layer.getLayerByID(layer_id)
+      .then(function(layer){
+        return new Promise(function(fulfill, reject){
+        if(layer.last_updated > source.updated){    
+          log.info('Source Update: ' +  source.updated + ' Layer Updated: ' + layer.last_updated);
+          if(!source.updating){
+            source.updating = true;
+            //lockfile
+            var lockfilePath = TILE_PATH + '/' + layer_id + '.lock'; 
+            lockFile.lock(lockfilePath, {}, function (err) {          
+              if(err){
+                //falied to acquire lock, another instance is updating this source
+                source.updating = false;
+                log.error(err);
+                fulfill(source);
+              }else{
+                log.info('lockfile created at:' + lockfilePath);
+                //check metadata
+                var metadataPath = TILE_PATH + '/' + layer_id + '/metadata.json';
+                fs.readFile(metadataPath, function(err, data) {
+                  if(err){
+                    source.updating = false;
+                    log.error(err);
+                    fulfill(source);
+                  } 
+                  log.info('opened metadata: ' + metadataPath);
+                  var metadata = JSON.parse(data);
+                  if(layer.last_updated !== metadata.updated){
+                    log.info('Updating Layer: ' + layer_id);
+                    var options = {
+                      type: 'scanline',
+                      minzoom: 0,
+                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
+                      bounds:layer.extent_bbox,
+                      retry: undefined,
+                      slow: undefined,
+                      timeout: undefined,
+                      close:true
+                    };
+                    var updateTilesPromise = updateTiles(source, layer, options).then(function(){
+                      source.updating = false;
+                      source.updated = layer.last_updated;
+                      metadata.updated = layer.last_updated;
+                      //update metadata
+                      return new Promise(function(fulfill, reject){
+                        fs.writeFile(metadataPath, JSON.stringify(metadata), function(err){
+                          if(err) {
+                            source.updating = false;
+                            log.error(err);                 
+                          }
+                          //close lockfile
+                          lockFile.unlock(lockfilePath, function (err) {
+                            if(err){
+                              source.updating = false;
+                              log.error(err);
+                              reject(err);
+                            } else{
+                              log.info('closed lockfile');
+                              fulfill(source);
+                            }                         
+                          });
+                        });  
+                      });                                       
+                    });
+                    fulfill(updateTilesPromise);
+                  }else{
+                    log.info('tiles already up to date, updating source object');
+                    //the local source is just behind
+                      source.updated = layer.last_updated;
+                      lockFile.unlock(lockfilePath, function (err) {
+                        if(err){
+                          log.error(err);
+                          reject(err);
+                        }else{
+                          log.info('closed lockfile');
+                          fulfill(source);
+                        } 
+                      });                   
+                  }
+                });             
+              }             
+            });
+          
+           }else{
+             log.warn('source already updating');
+            fulfill(source);
+          }          
+        }else{
+          fulfill(source);
+        }
+        });
+      });     
     }
-   });
   },
 
   loadSource: function(layer_id){
@@ -43,10 +126,8 @@ module.exports = {
     return Layer.getLayerByID(layer_id)
     .then(function(layer){
       return new Promise(function(fulfill, reject){
-        //adding last_updated to the tilelive URI to bust the cache when a layer updates
-        return cache.load('maphubs://layer/' + layer_id + '/' + layer.last_updated, function(err, source) {
+        return tilelive.load('maphubs://layer/' + layer_id, function(err, source) {
           if(err){
-            //log.error(err);
             reject(err);
           }else{
             log.info('Loaded Source for layer ID: ' + layer_id);
@@ -80,7 +161,7 @@ module.exports = {
     });
   },
 
-  //restart source to update it and clear cache
+  //restart source to update it and clear tiles
   restartSource: function(layer_id){
     log.info('restartSource: ' + layer_id);
     var _this = this;
@@ -95,16 +176,32 @@ module.exports = {
     //loop through all layers and setup sources for them
     Layer.getAllLayerIDs()
         .then(function(result){
+          var initCommands = [];
           result.forEach(function(layer){
             var layer_id = parseInt(layer.layer_id);
-            return _this.loadSource(layer_id).
-            then(function(){
-                  //warm the cache
-                 return cache.load('maphubs://layer/' + layer.layer_id);
-            })
-            .catch(function(err){
-                log.error(err.message);
-            });
+            initCommands.push(_this.loadSource(layer_id).
+            then(function(source){
+                 //if tile files don't exist create them
+                 if (!fs.existsSync(TILE_PATH + '/'+ layer_id)) {             
+                  return Layer.getLayerByID(layer_id)
+                  .then(function(layerObj){
+                      var options = {
+                      type: 'scanline',
+                      minzoom: 0,
+                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
+                      bounds:layerObj.extent_bbox,
+                      retry: undefined,
+                      slow: undefined,
+                      timeout: undefined,
+                      close:true
+                    };
+                    return updateTiles(source, layerObj, options);
+                  });
+                }
+            }));            
+          });
+          return Promise.all(initCommands).then(function(){
+            log.info('Finished loading sources');
           });
         }).catch(function(err){
             log.error(err.message);
@@ -149,19 +246,7 @@ module.exports = {
     .then(function(layer){
       return _this.getSource(layer_id)
       .then(function(result){
-        var source = result.source;
-
-        //check if layer has been updated
-        var updated = result.updated;
-        if(layer.last_updated > updated){
-          log.info('Reloading Updated Layer: ' + layer_id);
-          return _this.restartSource(layer_id)
-          .then(function(newSource){
-            return _this.getInfoHelper(newSource, layer);
-          });
-        }else{
-          return _this.getInfoHelper(source, layer);
-        }
+        return _this.getInfoHelper(result.source, layer);
       });
     });
   }

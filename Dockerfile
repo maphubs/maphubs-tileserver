@@ -23,4 +23,5 @@ RUN chmod +x /app/docker-entrypoint.sh &&\
     cp /app/env/deploy_local.js  /app/local.js
 
 EXPOSE 4001
+VOLUME /data
 CMD /app/docker-entrypoint.sh
