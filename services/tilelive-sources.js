@@ -32,7 +32,7 @@ module.exports = {
           if(!source.updating){
             source.updating = true;
             //lockfile
-            var lockfilePath = TILE_PATH + '/' + layer_id + '/update.lock'; 
+            var lockfilePath = TILE_PATH + '/' + layer_id + '.lock'; 
             lockFile.lock(lockfilePath, {}, function (err) {          
               if(err){
                 //falied to acquire lock, another instance is updating this source
@@ -40,6 +40,7 @@ module.exports = {
                 log.error(err);
                 fulfill(source);
               }else{
+                log.info('lockfile created at:' + lockfilePath);
                 //check metadata
                 var metadataPath = TILE_PATH + '/' + layer_id + '/metadata.json';
                 fs.readFile(metadataPath, function(err, data) {
@@ -48,8 +49,9 @@ module.exports = {
                     log.error(err);
                     fulfill(source);
                   } 
+                  log.info('opened metadata: ' + metadataPath);
                   var metadata = JSON.parse(data);
-                  if(layer.last_updated > metadata.updated){
+                  if(layer.last_updated !== metadata.updated){
                     log.info('Updating Layer: ' + layer_id);
                     var options = {
                       type: 'scanline',
@@ -79,6 +81,7 @@ module.exports = {
                               log.error(err);
                               reject(err);
                             } else{
+                              log.info('closed lockfile');
                               fulfill(source);
                             }                         
                           });
@@ -87,19 +90,20 @@ module.exports = {
                     });
                     fulfill(updateTilesPromise);
                   }else{
+                    log.info('tiles already up to date, updating source object');
                     //the local source is just behind
                       source.updated = layer.last_updated;
                       lockFile.unlock(lockfilePath, function (err) {
                         if(err){
                           log.error(err);
                           reject(err);
+                        }else{
+                          log.info('closed lockfile');
+                          fulfill(source);
                         } 
-                      });
-                     fulfill(source) ;
+                      });                   
                   }
-                });
-
-               
+                });             
               }             
             });
           
@@ -172,9 +176,10 @@ module.exports = {
     //loop through all layers and setup sources for them
     Layer.getAllLayerIDs()
         .then(function(result){
+          var initCommands = [];
           result.forEach(function(layer){
             var layer_id = parseInt(layer.layer_id);
-            return _this.loadSource(layer_id).
+            initCommands.push(_this.loadSource(layer_id).
             then(function(source){
                  //if tile files don't exist create them
                  if (!fs.existsSync(TILE_PATH + '/'+ layer_id)) {             
@@ -193,10 +198,10 @@ module.exports = {
                     return updateTiles(source, layerObj, options);
                   });
                 }
-            })
-            .catch(function(err){
-                log.error(err.message);
-            });
+            }));            
+          });
+          return Promise.all(initCommands).then(function(){
+            log.info('Finished loading sources');
           });
         }).catch(function(err){
             log.error(err.message);
