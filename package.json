@@ -26,6 +26,7 @@
     "express-session": "^1.14.2",
     "knex": "^0.12.6",
     "lockfile": "^1.0.3",
+    "lodash.find": "^4.6.0",
     "mbtiles": "^0.9.0",
     "mkdirp": "^0.5.1",
     "morgan": "1.7.0",

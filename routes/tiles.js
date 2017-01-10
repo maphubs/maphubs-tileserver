@@ -15,19 +15,20 @@ var mkdirp = require('mkdirp');
 var local = require('../local');
 var updateTiles = require('../services/updateTiles');
 var TILE_PATH = local.tilePath ? local.tilePath : '/data';
+var privateLayerCheck = require('../services/private-layer-check').middleware;
 
 module.exports = function(app) {
 
   Sources.init();
 
    
-  app.get('/tiles/layer/:layerid(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', function(req, res){
+  app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', privateLayerCheck, function(req, res){
 
     var z = req.params.z;
     var x = req.params.x;
     var y =req.params.y;
 
-    var layer_id = req.params.layerid;
+    var layer_id = req.params.layer_id;
 
     Sources.getSource(layer_id)
     .then(function(result){
@@ -139,9 +140,9 @@ module.exports = function(app) {
     });
   });
   
-  app.get('/tiles/layer/:layerid(\\d+)/index.json', function(req, res, next) {
+  app.get('/tiles/layer/:layer_id(\\d+)/index.json', privateLayerCheck, function(req, res, next) {
 
-    var layer_id = parseInt(req.params.layerid);
+    var layer_id = parseInt(req.params.layer_id);
     try{
         Sources.getInfo(layer_id)
     .then(function(info){
@@ -151,9 +152,9 @@ module.exports = function(app) {
           uri = "https://";
       }
 
-      uri += req.headers.host;
+      uri += local.host;
 
-      if(local.port !== 80 && local.port !== '80' && !req.headers.host.includes(':')){
+      if(local.port !== 80 && local.port !== '80'){
         uri += ':' + local.port;
       }
 
@@ -171,39 +172,56 @@ module.exports = function(app) {
 
   });
 
-   app.get('/tiles/layer/:layerid(\\d+)/updatetiles', function(req, res, next) {
+   app.get('/tiles/layer/:layer_id(\\d+)/updatetiles', privateLayerCheck, function(req, res) {
 
-    var layer_id = parseInt(req.params.layerid);
-       Sources.getSource(layer_id)
-    .then(function(result){
-      return Layer.getLayerByID(layer_id)
-      .then(function(layer){
-        var source = result.source;
-        if(!source){
-          var msg = "Source not found for layer: " + layer_id;
-          log.error(msg);
-          res.status(500).send(msg);
-          return;
-        }
-        var options = {
-            type: 'scanline',
-            minzoom: 0,
-            maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
-            bounds:layer.extent_bbox,
-            retry: undefined,
-            slow: undefined,
-            timeout: undefined,
-            close:true
-          };
-        return updateTiles(source, layer_id, options)
-        .then(function(){
-          res.status(200).send({success: true});
+    if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
+      var user_id = req.session.user.id;
+      var layer_id = parseInt(req.params.layerid);
+      Layer.allowedToModify(layer_id, user_id)
+      .then(function(allowed){
+        if(allowed){
+       return Sources.getSource(layer_id)
+      .then(function(result){
+        return Layer.getLayerByID(layer_id)
+        .then(function(layer){
+          var source = result.source;
+          if(!source){
+            var msg = "Source not found for layer: " + layer_id;
+            log.error(msg);
+            res.status(500).send(msg);
+            return;
+          }
+          var options = {
+              type: 'scanline',
+              minzoom: 0,
+              maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
+              bounds:layer.extent_bbox,
+              retry: undefined,
+              slow: undefined,
+              timeout: undefined,
+              close:true
+            };
+            return updateTiles(source, layer_id, options)
+            .then(function(){
+              res.status(200).send({success: true});
+            });    
         });
-    });
-     
-  }).catch(function(err){
-      log.error(err);
-      res.status(200).send({success: false});
-  });
+        });
+        }else{
+          res.status(401).send({
+            success: false,
+            error: "Unauthorized"
+          });
+        }
+      }).catch(function(err){
+          log.error(err);
+          res.status(200).send({success: false});
+      });
+    }else{
+      res.status(401).send({
+        success: false,
+        error: "Unauthorized"
+      });
+    }
   });
 };

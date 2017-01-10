@@ -216,10 +216,12 @@ module.exports = {
        }
 
        var info = {};
-
-       Object.keys(_info).forEach(function(key) {
+       if(_info){
+         Object.keys(_info).forEach(function(key) {
          info[key] = _info[key];
        });
+       }
+       
 
        if (info.vector_layers) {
          info.format = "pbf";
@@ -227,13 +229,15 @@ module.exports = {
 
        info.layer_id = layer.layer_id;
        info.updated = layer.last_updated;
-       info.name = info.name || "Untitled";
-       info.center = info.center || [-122.4440, 37.7908, 12];
-       info.bounds = info.bounds || [-180, -85.0511, 180, 85.0511];
+       info.name = info.name || layer.name || "Untitled";
+       info.center = info.center || [0, 0, 12];
+       info.bounds = info.bounds || layer.extent_bbox || [-180, -85.0511, 180, 85.0511];
        info.format = "pbf";
        info.minzoom = Math.max(0, info.minzoom | 0);
-       info.maxzoom = info.maxzoom || Infinity;
+       info.maxzoom = info.maxzoom || 22;
        info.group_id = layer.owned_by_group_id;
+       info.description = info.description || layer.description;
+       info.attribution = info.attribution || layer.source;
 
        fulfill(info);
      });

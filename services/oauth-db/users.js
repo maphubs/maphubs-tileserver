@@ -23,10 +23,12 @@ exports.find = function(id, done) {
     .then(function(data) {
       if (data.length == 1) {
         var user = translateUserObject(data[0]);
-        return done(null, user);
+        done(null, user);
+        return null;
       } else {
         //not found
-        return done('User Not Found: ' + id, null);
+        done('User Not Found: ' + id, null);
+        return null;
       }
 
     }).catch(function(err) {
