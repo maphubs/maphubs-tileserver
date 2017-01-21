@@ -42,12 +42,11 @@ module.exports = {
               }else{
                 log.info('lockfile created at:' + lockfilePath);
                 //check metadata
-                var metadataPath = TILE_PATH + '/' + layer_id + '/metadata.json';
+                var metadataPath = TILE_PATH + '/' + layer_id + '/updated.json';
                 fs.readFile(metadataPath, function(err, data) {
                   if(err){
-                    source.updating = false;
-                    log.error(err);
-                    fulfill(source);
+                    //layer doesn't exist yet
+                    data = "{}";
                   } 
                   log.info('opened metadata: ' + metadataPath);
                   var metadata = JSON.parse(data);
