@@ -55,7 +55,7 @@ module.exports = {
                     var options = {
                       type: 'scanline',
                       minzoom: 0,
-                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
+                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
                       bounds:layer.extent_bbox,
                       retry: undefined,
                       slow: undefined,
@@ -187,7 +187,7 @@ module.exports = {
                       var options = {
                       type: 'scanline',
                       minzoom: 0,
-                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 8,
+                      maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
                       bounds:layerObj.extent_bbox,
                       retry: undefined,
                       slow: undefined,
