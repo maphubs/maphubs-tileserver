@@ -31,18 +31,7 @@ var getLayer = function(layer_id){
               throw new Error("Layer not Found: " + layer_id);
           }
 
-          var tableName = 'layers.';
-          if(layer.data_type == 'point'){
-            tableName += 'points';
-          } else if (layer.data_type == 'line'){
-            tableName += 'lines';
-          } else if (layer.data_type == 'polygon'){
-            tableName += 'polygons';
-          } else {
-            var msg = "layer data type not set";
-            debug(msg);
-          }
-          tableName += '_' + layer.layer_id;
+          var tableName = 'layers.data_full_' + layer.layer_id;
 
           var bounds = "";
           if(layer.extent_bbox){
