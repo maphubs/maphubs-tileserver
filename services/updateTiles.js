@@ -1,5 +1,5 @@
 //@flow
-var tilelive = require('tilelive');
+var tilelive = require('@mapbox/tilelive');
 var log = require('./log.js');
 var exec = require('child_process').exec;
 var Promise = require('bluebird');

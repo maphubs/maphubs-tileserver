@@ -3,10 +3,13 @@
   "rules": {
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1,
-    semi: [2, "always"]
+    "semi": [2, "always"]
   },
 
   "env": {
     "node": true
-  }
+  },
+  "plugins": [
+    "flowtype"
+  ]
 }

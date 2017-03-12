@@ -3,7 +3,7 @@ var Layer = require('../models/layer');
 var Promise = require('bluebird');
 var debug = require('./debug')('tilelive-sources');
 var local = require('../local');
-var tilelive = require("tilelive");
+var tilelive = require("@mapbox/tilelive");
 require('./tilelive-maphubs2')(tilelive);
 var fs = require('fs');
 var updateTiles = require('./updateTiles');

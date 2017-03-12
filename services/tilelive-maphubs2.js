@@ -4,7 +4,7 @@ var url = require("url"),
     xml = require("xml"),
     util = require("util");
 
-var Bridge = require("tilelive-bridge");
+var Bridge = require("@mapbox/tilelive-bridge");
 var Layer = require('../models/layer');
 var debug = require('./debug')('MaphubsSource');
 var local = require('../local');
