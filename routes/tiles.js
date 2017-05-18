@@ -1,19 +1,11 @@
 /* @flow weak */
 var log = require('../services/log.js');
-
-var path = require("path");
 var fs = require('fs');
 var Promise = require('bluebird');
-
 //var debug = require('../services/debug')('tiles');
-
 var Sources = require('../services/tilelive-sources');
-var nextError = require('../services/error-response').nextError;
-
-var Layer = require('../models/layer');
 var mkdirp = require('mkdirp');
 var local = require('../local');
-var updateTiles = require('../services/updateTiles');
 var TILE_PATH = local.tilePath ? local.tilePath : '/data';
 var privateLayerCheck = require('../services/private-layer-check').middleware;
 
@@ -21,7 +13,6 @@ module.exports = function(app) {
 
   Sources.init();
 
-   
   app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', privateLayerCheck, function(req, res){
 
     var z = req.params.z;
@@ -138,90 +129,5 @@ module.exports = function(app) {
         log.error(err.message);
       }
     });
-  });
-  
-  app.get('/tiles/layer/:layer_id(\\d+)/index.json', privateLayerCheck, function(req, res, next) {
-
-    var layer_id = parseInt(req.params.layer_id);
-    try{
-        Sources.getInfo(layer_id)
-    .then(function(info){
-
-      var uri = "http://";
-      if(local.useHttps){
-          uri = "https://";
-      }
-
-      uri += local.host;
-
-      if(local.port !== 80 && local.port !== '80'){
-        uri += ':' + local.port;
-      }
-
-      uri +=
-        (path.dirname(req.originalUrl) + "/{z}/{x}/{y}.pbf").replace(/\/+/g, "/");
-
-      info.tiles = [uri];
-      info.tilejson = "2.0.0";
-
-      return res.status(200).send(info);
-    }).catch(nextError(next));
-    }catch(err){
-        next(err);
-    }
-
-  });
-
-   app.get('/tiles/layer/:layer_id(\\d+)/updatetiles', privateLayerCheck, function(req, res) {
-
-    if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
-      var user_id = req.session.user.maphubsUser.id;
-      var layer_id = parseInt(req.params.layerid);
-      Layer.allowedToModify(layer_id, user_id)
-      .then(function(allowed){
-        if(allowed){
-       return Sources.getSource(layer_id)
-      .then(function(result){
-        return Layer.getLayerByID(layer_id)
-        .then(function(layer){
-          var source = result.source;
-          if(!source){
-            var msg = "Source not found for layer: " + layer_id;
-            log.error(msg);
-            res.status(500).send(msg);
-            return;
-          }
-          var options = {
-              type: 'scanline',
-              minzoom: 0,
-              maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
-              bounds:layer.extent_bbox,
-              retry: undefined,
-              slow: undefined,
-              timeout: undefined,
-              close:true
-            };
-            return updateTiles(source, layer_id, options)
-            .then(function(){
-              res.status(200).send({success: true});
-            });    
-        });
-        });
-        }else{
-          res.status(401).send({
-            success: false,
-            error: "Unauthorized"
-          });
-        }
-      }).catch(function(err){
-          log.error(err);
-          res.status(200).send({success: false});
-      });
-    }else{
-      res.status(401).send({
-        success: false,
-        error: "Unauthorized"
-      });
-    }
   });
 };
