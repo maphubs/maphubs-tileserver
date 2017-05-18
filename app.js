@@ -6,14 +6,22 @@ var log = require('./services/log.js');
 var responseTime = require("response-time");
 var knex = require('./connection.js');
 var cookieParser = require('cookie-parser');
+var Raven = require('raven');
+var version = require('../package.json').version;
 
 var app = express();
 app.enable('trust proxy');
 app.disable("x-powered-by");
 
-process.on('uncaughtException', function(err) {
-  log.error('Caught exception: ' + err.stack);
-});
+var ravenConfig = (process.env.NODE_ENV === 'production' && !local.disableTracking) && local.SENTRY_DSN;
+Raven.config(ravenConfig, {
+  release: 'tileserver-' + version,
+  environment: process.env.NODE_ENV,
+  tags: {host: local.host},
+  parseUser: ['id', 'name', 'email']
+}).install();
+
+app.use(Raven.requestHandler());
 
 app.use(responseTime());
 
