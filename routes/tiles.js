@@ -175,7 +175,7 @@ module.exports = function(app) {
    app.get('/tiles/layer/:layer_id(\\d+)/updatetiles', privateLayerCheck, function(req, res) {
 
     if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
-      var user_id = req.session.user.id;
+      var user_id = req.session.user.maphubsUser.id;
       var layer_id = parseInt(req.params.layerid);
       Layer.allowedToModify(layer_id, user_id)
       .then(function(allowed){

@@ -7,7 +7,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
-  db.users.find(user.id, function(err, user) {
+  db.users.find(user.maphubsUser.id, function(err, user) {
     done(err, user);
   });
 });
