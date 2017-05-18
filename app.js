@@ -1,5 +1,4 @@
 var local = require('./local');
-if(!local.disableTracking) require('newrelic');
 var express = require('express');
 var load = require('express-load');
 var logger = require('morgan');
