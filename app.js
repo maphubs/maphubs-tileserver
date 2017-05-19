@@ -7,7 +7,7 @@ var responseTime = require("response-time");
 var knex = require('./connection.js');
 var cookieParser = require('cookie-parser');
 var Raven = require('raven');
-var version = require('../package.json').version;
+var version = require('./package.json').version;
 
 var app = express();
 app.enable('trust proxy');
