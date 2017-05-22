@@ -10,7 +10,9 @@
     "version": "",
     "postversion": "git push && git push --tags && npm run changelog",
     "deploy-patch": "npm version patch --force -m \"version %s\"",
-    "deploy-minor": "npm version minor --force -m \"version %s\""
+    "deploy-minor": "npm version minor --force -m \"version %s\"",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Kristofor Carle <kris@maphubs.com>",
   "license": "GPL-3.0",
@@ -38,10 +40,12 @@
     "response-time": "^2.3.2",
     "tilelive-file": "^0.0.3",
     "winston": "^2.3.0",
-    "xml": "^1.0.1"
+    "xml": "^1.0.1",
+    "snyk": "^1.30.1"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-plugin-flowtype": "^2.33.0"
-  }
+  },
+  "snyk": true
 }
