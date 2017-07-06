@@ -1,7 +1,7 @@
 var log = require('./log');
 var local = require('../local');
 
-module.exports = function(setCors, allowForwardedIP){
+module.exports = function(setCors){
 
 return function(req, res, next){
 
@@ -32,61 +32,12 @@ return function(req, res, next){
     next();
   }else{
     //determine if this is the manet screenshot service
-
-    //first check the cookie
     if(req.cookies) log.info('cookies: ' + JSON.stringify(req.cookies));
     if(!req.cookies || !req.cookies.manet || req.cookies.manet !== local.manetAPIKey){
       log.error('Manet Cookie Not Found');
       return failure();
-    }
-
-    //then check the IP
-    var ip = req.connection.remoteAddress;
-    var forwardedIP = req.headers['x-forwarded-for'];
-    log.info('RemoteAddress:' + ip);
-    log.info('x-forwarded-for:' + forwardedIP);
-    var manetUrl = local.manetUrl;
-    if(process.env.OMH_MANET_IP) {
-       if(process.env.OMH_MANET_IP !== ip){
-          //remoteAddress doesn't match
-          if(allowForwardedIP && forwardedIP){
-            //check forwarded address
-            if(process.env.OMH_MANET_IP !== forwardedIP){
-              log.error('Unauthenticated screenshot request, manet IP does not match');
-              log.error('Expected IP:' + process.env.OMH_MANET_IP);
-              return failure();
-            }
-          }else{
-            log.error('Unauthenticated screenshot request, manet IP does not match');
-            log.error('Expected IP:' + process.env.OMH_MANET_IP);
-            return failure();
-          }
-        }
-        //IP Check passes
-        return success();
-
     }else{
-      var manetHost = require('url').parse(manetUrl).hostname;
-      return require('dns').lookup(manetHost, function(err, addresses) {
-        if(err){
-          log.error(err);
-          return failure();
-        }else if(!addresses){
-          log.error("Failed to lookup manet addresses");
-          return failure();
-        }else{
-          log.info('valid manet addresses:', addresses);
-          if(!addresses.includes(ip)
-          && !addresses.includes(forwardedIP) ){
-            log.error('Unauthenticated screenshot request, manet IP does not match');
-            return failure();
-          }
-        }
-
-        //IP Check passes
-        return success();
-
-      });
+      return success();
     }
   }
 };

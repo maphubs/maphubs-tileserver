@@ -66,7 +66,7 @@ app.use(passport.session());
 require('./services/auth');
 
 if(local.requireLogin){
-   checkLogin = require('./services/manet-check')(restrictCors, true);
+   checkLogin = require('./services/manet-check')(restrictCors);
 }else{
   checkLogin = function(req, res, next){
     next();
