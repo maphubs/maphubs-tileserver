@@ -28,7 +28,6 @@ app.use(responseTime());
 app.use(logger('dev'));
 
 app.use(cookieParser());
-var checkLogin;
 
 var restrictCors = false;
 if(local.requireLogin && process.env.NODE_ENV === 'production'){
@@ -64,16 +63,6 @@ app.use(passport.session());
 
 //load passport auth config
 require('./services/auth');
-
-if(local.requireLogin){
-   checkLogin = require('./services/manet-check')(restrictCors);
-}else{
-  checkLogin = function(req, res, next){
-    next();
-  };
-}
-
-app.use(checkLogin);
 
 //CORS
 app.use(function(req, res, next) {

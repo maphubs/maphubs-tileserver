@@ -5,9 +5,22 @@ var local = require('../local');
 var log = require('../services/log.js');
 var updateTiles = require('../services/updateTiles');
 
+var checkLogin;
+var restrictCors = false;
+if(local.requireLogin){
+  if(process.env.NODE_ENV === 'production'){
+     restrictCors = true;
+  }
+  checkLogin = require('./services/manet-check')(restrictCors);
+}else{
+  checkLogin = function(req, res, next){
+    next();
+  };
+}
+
 module.exports = function(app) {
 
- app.get('/tiles/layer/:layer_id(\\d+)/updatetiles', privateLayerCheck, function(req, res) {
+ app.get('/tiles/layer/:layer_id(\\d+)/updatetiles', checkLogin, privateLayerCheck, function(req, res) {
 
     if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
       var user_id = req.session.user.maphubsUser.id;

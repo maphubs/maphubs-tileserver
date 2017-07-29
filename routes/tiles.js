@@ -9,11 +9,24 @@ var local = require('../local');
 var TILE_PATH = local.tilePath ? local.tilePath : '/data';
 var privateLayerCheck = require('../services/private-layer-check').middleware;
 
+var checkLogin;
+var restrictCors = false;
+if(local.requireLogin){
+  if(process.env.NODE_ENV === 'production'){
+     restrictCors = true;
+  }
+  checkLogin = require('./services/manet-check')(restrictCors);
+}else{
+  checkLogin = function(req, res, next){
+    next();
+  };
+}
+
 module.exports = function(app) {
 
   Sources.init();
 
-  app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', privateLayerCheck, function(req, res){
+  app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', checkLogin, privateLayerCheck, function(req, res){
 
     var z = req.params.z;
     var x = req.params.x;
