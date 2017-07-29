@@ -205,53 +205,6 @@ module.exports = {
         }).catch(function(err){
             log.error(err.message);
         });
-  },
-
-  getInfoHelper: function(source, layer){
-    return new Promise(function(fulfill, reject){
-      source.getInfo(function(err, _info) {
-       if (err) {
-         return reject(err);
-       }
-
-       var info = {};
-       if(_info){
-         Object.keys(_info).forEach(function(key) {
-         info[key] = _info[key];
-       });
-       }
-       
-
-       if (info.vector_layers) {
-         info.format = "pbf";
-       }
-
-       info.layer_id = layer.layer_id;
-       info.updated = layer.last_updated;
-       info.name = info.name || layer.name || "Untitled";
-       info.center = info.center || [0, 0, 12];
-       info.bounds = info.bounds || layer.extent_bbox || [-180, -85.0511, 180, 85.0511];
-       info.format = "pbf";
-       info.minzoom = Math.max(0, info.minzoom | 0);
-       info.maxzoom = info.maxzoom || 22;
-       info.group_id = layer.owned_by_group_id;
-       info.description = info.description || layer.description;
-       info.attribution = info.attribution || layer.source;
-
-       fulfill(info);
-     });
-   });
-  },
-
-  getInfo: function(layer_id){
-    var _this = this;
-    return Layer.getLayerByID(layer_id)
-    .then(function(layer){
-      return _this.getSource(layer_id)
-      .then(function(result){
-        return _this.getInfoHelper(result.source, layer);
-      });
-    });
   }
 
 };
