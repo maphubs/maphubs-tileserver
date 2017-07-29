@@ -321,10 +321,6 @@ concat-stream@^1.5.2:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-connect-ensure-login@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/connect-ensure-login/-/connect-ensure-login-0.1.1.tgz#174dcc51243b9eac23f8d98215aeb6694e2e8a12"
-
 connect-session-knex@^1.3.0:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/connect-session-knex/-/connect-session-knex-1.3.4.tgz#bc25f2c5b3892fc9095130c44d4c00ee66c10a4a"
