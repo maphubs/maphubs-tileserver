@@ -19,8 +19,10 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
 
 WORKDIR /app
 
-COPY package.json yarn.lock /app/
+COPY package.json yarn.lock .snyk /app/
 RUN yarn install --production --pure-lockfile
+
+RUN npm run snyk-protect
 
 COPY . /app
 RUN chmod +x /app/docker-entrypoint.sh &&\
