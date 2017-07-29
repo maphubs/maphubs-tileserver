@@ -140,10 +140,6 @@ assert-plus@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-0.2.0.tgz#d74e1b87e7affc0db8aadb7021f3fe48101ab234"
 
-async@0.2.9:
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/async/-/async-0.2.9.tgz#df63060fbf3d33286a76aaf6d55a2986d9ff8619"
-
 async@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async/-/async-1.0.0.tgz#f8fc04ca3a13784ade9e1641af98578cfbd647a9"
@@ -324,6 +320,10 @@ concat-stream@^1.5.2:
 connect-session-knex@^1.3.0:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/connect-session-knex/-/connect-session-knex-1.3.4.tgz#bc25f2c5b3892fc9095130c44d4c00ee66c10a4a"
+
+consign@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/consign/-/consign-0.1.6.tgz#5a9b3a60ba5d362a514841b0c633e584486a72d7"
 
 console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   version "1.1.0"
@@ -650,12 +650,6 @@ expand-tilde@^1.2.2:
   resolved "https://registry.yarnpkg.com/expand-tilde/-/expand-tilde-1.2.2.tgz#0b81eba897e5a3d31d1c3d102f8f01441e559449"
   dependencies:
     os-homedir "^1.0.1"
-
-express-load@1.1.15:
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/express-load/-/express-load-1.1.15.tgz#7a1b29d98b9eb25a8a069eca315808d05f013929"
-  dependencies:
-    async "0.2.9"
 
 express-session@^1.15.3:
   version "1.15.4"

@@ -1,6 +1,6 @@
 var local = require('./local');
 var express = require('express');
-var load = require('express-load');
+var consign = require('consign');
 var logger = require('morgan');
 var log = require('./services/log.js');
 var responseTime = require("response-time");
@@ -77,8 +77,8 @@ app.use(function(req, res, next) {
   next();
 });
 
-//load all route files using express-load
-load('./routes').into(app);
+//load all route files
+consign().include('./routes').into(app);
 
 var http = require('http');
 var server = http.createServer(app);
