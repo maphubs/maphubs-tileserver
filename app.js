@@ -1,3 +1,4 @@
+//@flow
 var local = require('./local');
 var express = require('express');
 var consign = require('consign');
@@ -8,6 +9,8 @@ var knex = require('./connection.js');
 var cookieParser = require('cookie-parser');
 var Raven = require('raven');
 var version = require('./package.json').version;
+
+require('babel-register')({});
 
 var app = express();
 app.enable('trust proxy');
@@ -65,7 +68,7 @@ app.use(passport.session());
 require('./services/auth');
 
 //CORS
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   if(!restrictCors){
     res.header('Access-Control-Allow-Origin', '*');
   }
@@ -83,7 +86,7 @@ consign().include('./routes').into(app);
 var http = require('http');
 var server = http.createServer(app);
 server.setTimeout(10*60*1000); // 10 * 60 seconds * 1000 msecs
-server.listen(local.internal_port, function () {
+server.listen(local.internal_port, () => {
     log.info('**** STARTING SERVER ****');
     log.info('Server Running on port: ' + local.internal_port);
 });

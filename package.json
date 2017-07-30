@@ -19,6 +19,11 @@
   "dependencies": {
     "@mapbox/tilelive": "5.12.6",
     "@mapbox/tilelive-bridge": "2.4.0",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.24.1",
     "bluebird": "3.5.0",
     "compression": "1.7.0",
     "connect-session-knex": "^1.3.4",
@@ -44,7 +49,10 @@
   },
   "devDependencies": {
     "eslint": "^4.3.0",
-    "eslint-plugin-flowtype": "^2.35.0"
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.35.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "flow-bin": "^0.51.1"
   },
   "snyk": true
 }

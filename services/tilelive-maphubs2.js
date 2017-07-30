@@ -1,5 +1,5 @@
 //Modified from tilelive-tmsource https://github.com/mojodna/tilelive-tmsource
-"use strict";
+//@flow
 var url = require("url"),
     xml = require("xml"),
     util = require("util");
@@ -23,11 +23,11 @@ tm.extent = {
     '900913': [-20037508.34, -20037508.34, 20037508.34, 20037508.34]
 };
 
-var getLayer = function(layer_id){
+var getLayer = function(layer_id: number){
 
   return Layer.getLayerByID(layer_id)
-      .then(function(layer){
-          if(layer == null){
+      .then((layer)=>{
+          if(layer === null){
               throw new Error("Layer not Found: " + layer_id);
           }
 
@@ -40,7 +40,7 @@ var getLayer = function(layer_id){
 
         var mapnikXML = {
           "Map": [
-            { _attr:
+            {_attr:
               {
                 "srs": tm.srs['900913'],
                 "buffer-size": 8
@@ -48,14 +48,14 @@ var getLayer = function(layer_id){
             },
             {
               "Parameters": [
-                {"Parameter": { _attr: { "name":"name"}, _cdata: layer.name}},
-                {"Parameter": { _attr: { "name":"description"}, _cdata: layer.name}},
-                {"Parameter": { _attr: { "name":"attribution"}, _cdata: layer.source}},
-                {"Parameter": { _attr: { "name":"bounds"}, _cdata:  bounds}},
-                {"Parameter": [{ _attr: { "name":"center"}}, "0,0,3"]},
-                {"Parameter": [{ _attr: { "name":"format"}}, "pbf"]},
-                {"Parameter": [{ _attr: { "name":"minzoom"}}, 0]},
-                {"Parameter": [{ _attr: { "name":"maxzoom"}}, 22]}
+                {"Parameter": {_attr: {"name":"name"}, _cdata: layer.name}},
+                {"Parameter": {_attr: {"name":"description"}, _cdata: layer.name}},
+                {"Parameter": {_attr: {"name":"attribution"}, _cdata: layer.source}},
+                {"Parameter": {_attr: {"name":"bounds"}, _cdata:  bounds}},
+                {"Parameter": [{_attr: {"name":"center"}}, "0,0,3"]},
+                {"Parameter": [{_attr: {"name":"format"}}, "pbf"]},
+                {"Parameter": [{_attr: {"name":"minzoom"}}, 0]},
+                {"Parameter": [{_attr: {"name":"maxzoom"}}, 22]}
               ]
             },
             {
@@ -72,17 +72,17 @@ var getLayer = function(layer_id){
                 },
                 {
                   "Datasource": [
-                    {"Parameter": { _attr: { "name":"dbname"}, _cdata: local.database.database}},
-                    {"Parameter": { _attr: { "name":"extent"}, _cdata: tm.extent['900913']}},
-                    {"Parameter": { _attr: { "name":"geometry_field"}, _cdata: "geom"}},
-                    {"Parameter": { _attr: { "name":"geometry_table"}, _cdata: ""}},
-                    {"Parameter": { _attr: { "name":"host"}, _cdata: local.database.host}},
-                    {"Parameter": { _attr: { "name":"max_size"}, _cdata: "256"}},
-                    {"Parameter": { _attr: { "name":"password"}, _cdata:  local.database.password}},
-                    {"Parameter": { _attr: { "name":"port"}, _cdata: ""}},
-                    {"Parameter": { _attr: { "name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from ' + tableName + ') data'}},
-                    {"Parameter": { _attr: { "name":"type"}, _cdata: "postgis"}},
-                    {"Parameter": { _attr: { "name":"user"}, _cdata: local.database.user}}
+                    {"Parameter": {_attr: {"name":"dbname"}, _cdata: local.database.database}},
+                    {"Parameter": {_attr: {"name":"extent"}, _cdata: tm.extent['900913']}},
+                    {"Parameter": {_attr: {"name":"geometry_field"}, _cdata: "geom"}},
+                    {"Parameter": {_attr: {"name":"geometry_table"}, _cdata: ""}},
+                    {"Parameter": {_attr: {"name":"host"}, _cdata: local.database.host}},
+                    {"Parameter": {_attr: {"name":"max_size"}, _cdata: "256"}},
+                    {"Parameter": {_attr: {"name":"password"}, _cdata:  local.database.password}},
+                    {"Parameter": {_attr: {"name":"port"}, _cdata: ""}},
+                    {"Parameter": {_attr: {"name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from ' + tableName + ') data'}},
+                    {"Parameter": {_attr: {"name":"type"}, _cdata: "postgis"}},
+                    {"Parameter": {_attr: {"name":"user"}, _cdata: local.database.user}}
                   ]
                 }
               ]
@@ -91,7 +91,7 @@ var getLayer = function(layer_id){
       };
 
         //if polygon also add a centroid layer for labels
-        if (layer.data_type == 'polygon'){
+        if (layer.data_type === 'polygon'){
 
           var centroidLayer = {
             "Layer": [
@@ -107,17 +107,17 @@ var getLayer = function(layer_id){
               },
               {
                 "Datasource": [
-                  {"Parameter": { _attr: { "name":"dbname"}, _cdata: local.database.database}},
-                  {"Parameter": { _attr: { "name":"extent"}, _cdata: tm.extent['900913']}},
-                  {"Parameter": { _attr: { "name":"geometry_field"}, _cdata: "centroid"}},
-                  {"Parameter": { _attr: { "name":"geometry_table"}, _cdata: ""}},
-                  {"Parameter": { _attr: { "name":"host"}, _cdata: local.database.host}},
-                  {"Parameter": { _attr: { "name":"max_size"}, _cdata: "256"}},
-                  {"Parameter": { _attr: { "name":"password"}, _cdata:  local.database.password}},
-                  {"Parameter": { _attr: { "name":"port"}, _cdata: ""}},
-                  {"Parameter": { _attr: { "name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from layers.centroids_' + layer_id + ') data'}},
-                  {"Parameter": { _attr: { "name":"type"}, _cdata: "postgis"}},
-                  {"Parameter": { _attr: { "name":"user"}, _cdata: local.database.user}}
+                  {"Parameter": {_attr: {"name":"dbname"}, _cdata: local.database.database}},
+                  {"Parameter": {_attr: {"name":"extent"}, _cdata: tm.extent['900913']}},
+                  {"Parameter": {_attr: {"name":"geometry_field"}, _cdata: "centroid"}},
+                  {"Parameter": {_attr: {"name":"geometry_table"}, _cdata: ""}},
+                  {"Parameter": {_attr: {"name":"host"}, _cdata: local.database.host}},
+                  {"Parameter": {_attr: {"name":"max_size"}, _cdata: "256"}},
+                  {"Parameter": {_attr: {"name":"password"}, _cdata:  local.database.password}},
+                  {"Parameter": {_attr: {"name":"port"}, _cdata: ""}},
+                  {"Parameter": {_attr: {"name":"table"}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from layers.centroids_' + layer_id + ') data'}},
+                  {"Parameter": {_attr: {"name":"type"}, _cdata: "postgis"}},
+                  {"Parameter": {_attr: {"name":"user"}, _cdata: local.database.user}}
                 ]
               }
             ]
@@ -131,7 +131,7 @@ var getLayer = function(layer_id){
 };
 
 
-var MaphubsSource = function(uri, callback) {
+var MaphubsSource = function(uri: Object, callback: Function) {
   uri = url.parse(uri);
 
   //Ex: maphubs://layer/1
@@ -141,18 +141,18 @@ var MaphubsSource = function(uri, callback) {
   var self = this;
 
   var id = uri.path.split('/')[1];
-  if(uri.host == 'layer' && id){
+  if(uri.host === 'layer' && id){
     var layer_id = id;
 
       return getLayer(layer_id)
-       .then(function(layerXML){
+       .then((layerXML)=>{
 
            var xmlString = '<?xml version="1.0" encoding="utf-8"?>';
            xmlString += '<!DOCTYPE Map[]>';
            xmlString += xml(layerXML);
 
            if(local.writeDebugData){
-             fs.writeFile(local.tempFilePath + '/mapnik-' + layer_id + '.xml', xmlString, function(err){
+             fs.writeFile(local.tempFilePath + '/mapnik-' + layer_id + '.xml', xmlString, (err)=>{
                if(err) {
                  log.error(err);
                  throw err;
@@ -165,7 +165,7 @@ var MaphubsSource = function(uri, callback) {
 
            return Bridge.call(self, uri, callback);
 
-         }).catch(function(err){
+         }).catch((err)=>{
              return callback(err);
          });
   }else{
@@ -180,12 +180,12 @@ MaphubsSource.prototype.getInfo = function(callback) {
 
 util.inherits(MaphubsSource, Bridge);
 
-MaphubsSource.registerProtocols = function(tilelive) {
+MaphubsSource.registerProtocols = function(tilelive: any) {
   debug('registerProtocols');
   tilelive.protocols["maphubs:"] = this;
 };
 
-module.exports = function(tilelive) {
+module.exports = function(tilelive: any) {
   debug('MaphubsSource');
   MaphubsSource.registerProtocols(tilelive);
 

@@ -1,9 +1,10 @@
+//@flow
 var log = require('./log');
 var local = require('../local');
 
-module.exports = function(setCors){
+module.exports = function(setCors: boolean){
 
-return function(req, res, next){
+return function(req: any, res: any, next: Function){
 
   var origin;
   if(local.useHttps){

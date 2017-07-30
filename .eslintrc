@@ -1,15 +1,54 @@
 {
-  "extends": "eslint:recommended",
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "arrowFunctions": true,
+      "binaryLiterals": true,
+      "blockBindings": true,
+      "classes": true,
+      "defaultParams": true,
+      "destructuring": true,
+      "forOf": true,
+      "generators": true,
+      "modules": true,
+      "objectLiteralComputedProperties": true,
+      "objectLiteralDuplicateProperties": true,
+      "objectLiteralShorthandMethods": true,
+      "objectLiteralShorthandProperties": true,
+      "octalLiterals": true,
+      "regexUFlag": true,
+      "regexYFlag": true,
+      "spread": true,
+      "superInFunctions": true,
+      "templateStrings": true,
+      "unicodeCodePointEscapes": true,
+      "globalReturn": true,
+      "jsx": true
+    }
+  },
+  "extends": ["eslint:recommended", "plugin:promise/recommended"],
   "rules": {
+    "generator-star-spacing": 1,
+    "babel/object-curly-spacing": 1,
+    "object-shorthand": 1,
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1,
-    "semi": [2, "always"]
+     "promise/no-nesting": "off",
+     "promise/avoid-new": "off",
+     "promise/no-callback-in-promise": "off",
+    "prefer-arrow-callback": 1,
+    "semi": [2, "always"],
+    "eqeqeq": 1 // require the use of === and !==
   },
 
   "env": {
     "node": true
   },
   "plugins": [
+    "babel",
+    "promise",
     "flowtype"
   ]
 }

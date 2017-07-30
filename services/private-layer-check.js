@@ -1,11 +1,12 @@
+//@flow
 var Layer = require('../models/layer');
 var log = require('./log');
 var nextError = require('./error-response').nextError;
 var apiDataError = require('./error-response').apiDataError;
 
-var check = function(layer_id, user_id){
+var check = function(layer_id: number, user_id: number){
   return Layer.isPrivate(layer_id)
-  .then(function(isPrivate){
+  .then((isPrivate)=>{
     if(isPrivate){
       if(user_id <= 0){
         return false;
@@ -19,7 +20,7 @@ var check = function(layer_id, user_id){
 };
 
 var middleware = function(view) {
-  return function(req, res, next){
+  return function(req: any, res: any, next: Function){
     var user_id = -1;
     if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
       user_id = req.session.user.maphubsUser.id;
@@ -37,16 +38,16 @@ var middleware = function(view) {
 
     if(layer_id && Number.isInteger(layer_id) && layer_id > 0){
       check(layer_id, user_id)
-      .then(function(allowed){
+      .then((allowed)=>{
         if(allowed){
           next();
           return null;
         }else{
           log.warn('Unauthorized attempt to access layer: ' + layer_id);
           if(view){
-            res.redirect('/unauthorized');
+            return res.redirect('/unauthorized');
           }else{
-            res.status(401).send({
+            return res.status(401).send({
               success: false,
               error: "Unauthorized"
             });
@@ -60,9 +61,7 @@ var middleware = function(view) {
 };
 
 module.exports = {
-
-  check: check,
+  check,
   middlewareView:  middleware(true),
   middleware: middleware(false)
-
 };

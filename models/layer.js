@@ -5,14 +5,14 @@ var _find = require('lodash.find');
 
 module.exports = {
 
-  getLayerByID: function(layer_id) {
+  getLayerByID(layer_id: number) {
     debug('getting layer: ' + layer_id);
 
     return knex.select('layer_id', 'name', 'description', 'data_type', 'status', 'source',
                         'owned_by_group_id', 'last_updated', 'extent_bbox')
         .table('omh.layers').where('layer_id', layer_id)
-      .then(function(result) {
-        if (result && result.length == 1) {
+      .then((result) => {
+        if (result && result.length === 1) {
           return result[0];
         }
         //else
@@ -20,14 +20,14 @@ module.exports = {
       });
   },
 
-  getAllLayerIDs: function(){
+  getAllLayerIDs(){
     return knex('omh.layers').select('layer_id').where({is_external: false, remote: false});
   },
 
-  isPrivate: function(layer_id){   
-  return knex.select('private').from('omh.layers').where({layer_id: layer_id})
-    .then(function(result) {
-      if (result && result.length == 1) {
+  isPrivate(layer_id: number){   
+  return knex.select('private').from('omh.layers').where({layer_id})
+    .then((result) => {
+      if (result && result.length === 1) {
         return result[0].private;
       }
       //else
@@ -35,22 +35,22 @@ module.exports = {
     });
   },
 
-  getGroupMembers: function(group_id) {
+  getGroupMembers(group_id: string) {
     return knex.select('public.users.id', 'public.users.display_name', 'public.users.email', 'omh.group_memberships.role').from('omh.group_memberships')
       .leftJoin('public.users', 'omh.group_memberships.user_id', 'public.users.id')
       .where('omh.group_memberships.group_id', group_id);
   },
 
-  allowedToModify: function(layer_id, user_id){
+  allowedToModify(layer_id: number, user_id: number){
     var _this = this;
     if(!layer_id || user_id <= 0){
       return false;
     }
     return this.getLayerByID(layer_id)
-      .then(function(layer){
+      .then((layer)=>{
         if(layer){
           return _this.getGroupMembers(layer.owned_by_group_id)
-        .then(function(users){
+        .then((users)=>{
           if(_find(users, {id: user_id}) !== undefined){
             return true;
           }
