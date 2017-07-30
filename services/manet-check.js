@@ -1,6 +1,7 @@
 //@flow
 var log = require('./log');
 var local = require('../local');
+var debug = require('../services/debug')('manet-check');
 
 var check = function(req:any, res:any, setCors?: boolean){
 
@@ -15,6 +16,9 @@ var check = function(req:any, res:any, setCors?: boolean){
     origin = 'http://';
   }
   origin += local.host;
+
+  debug(`Origin: ${origin}`);
+  debug(`Req: ${JSON.stringify(req.session)}`);
 
   if(req.isAuthenticated && req.isAuthenticated()){
     //allow authenticated request, but since this a require user restrict CORS

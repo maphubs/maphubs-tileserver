@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-ENV DEBIAN_FRONTEND=noninteractive NODE_ENV=production DEBUG=maphubs:*
+ENV DEBIAN_FRONTEND=noninteractive NODE_ENV=production
 
 #MapHubs - Tile Server
 MAINTAINER Kristofor Carle - MapHubs <kris@maphubs.com>
