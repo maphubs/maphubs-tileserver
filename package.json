@@ -52,6 +52,8 @@
     "eslint-plugin-babel": "^4.1.2",
     "eslint-plugin-flowtype": "^2.35.0",
     "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-unicorn": "^2.1.2",
     "flow-bin": "^0.51.1"
   },
   "snyk": true
