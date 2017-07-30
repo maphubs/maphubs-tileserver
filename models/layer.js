@@ -58,7 +58,7 @@ module.exports = {
     .whereNotNull('omh.maps.share_id')
     .where('omh.layers.shortid', shortid)
     .then(result=>{
-      if(result.count && result.count > 0){
+      if(result[0] && result[0].count && result[0].count > 0){
         return true;
       }
       return false;
