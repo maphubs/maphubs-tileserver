@@ -12,7 +12,7 @@ if(local.requireLogin){
   if(process.env.NODE_ENV === 'production'){
      restrictCors = true;
   }
-  checkLogin = require('../services/manet-check')(restrictCors);
+  checkLogin = require('../services/manet-check').middleware(restrictCors);
 }else{
   checkLogin = function(req, res, next){
     next();

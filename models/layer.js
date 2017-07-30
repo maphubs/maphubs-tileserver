@@ -20,6 +20,21 @@ module.exports = {
       });
   },
 
+  getLayerByShortID(shortid: string) {
+    debug('getting layer: ' + shortid);
+
+    return knex.select('layer_id', 'name', 'description', 'data_type', 'status', 'source',
+                        'owned_by_group_id', 'last_updated', 'extent_bbox')
+        .table('omh.layers').where({shortid})
+      .then((result) => {
+        if (result && result.length === 1) {
+          return result[0];
+        }
+        //else
+        return null;
+      });
+  },
+
   getAllLayerIDs(){
     return knex('omh.layers').select('layer_id').where({is_external: false, remote: false});
   },
@@ -32,6 +47,21 @@ module.exports = {
       }
       //else
       return true; //if we don't find the layer, assume it should be private
+    });
+  },
+
+  isSharedInPublicMap(shortid: string){
+    return knex.count('omh.layers.layer_id')
+    .from('omh.layers')
+    .leftJoin('omh.map_layers', 'omh.layers.layer_id', 'omh.map_layers.layer_id')
+    .leftJoin('omh.maps', 'omh.map_layers.map_id', 'omh.maps.map_id')
+    .whereNotNull('omh.maps.share_id')
+    .where('omh.layers.shortid', shortid)
+    .then(result=>{
+      if(result.count && result.count > 0){
+        return true;
+      }
+      return false;
     });
   },
 

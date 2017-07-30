@@ -7,15 +7,17 @@ var Sources = require('../services/tilelive-sources');
 var mkdirp = require('mkdirp');
 var local = require('../local');
 var TILE_PATH = local.tilePath ? local.tilePath : '/data';
-var privateLayerCheck = require('../services/private-layer-check').middleware;
+var privateLayerCheck = require('../services/private-layer-check');
 
+var Layer = require('../models/layer');
+var manetCheck = require('../services/manet-check').check;
 var checkLogin;
 var restrictCors = false;
 if(local.requireLogin){
   if(process.env.NODE_ENV === 'production'){
      restrictCors = true;
   }
-  checkLogin = require('../services/manet-check')(restrictCors);
+  checkLogin = require('../services/manet-check').middleware(restrictCors);
 }else{
   checkLogin = function(req, res, next){
     next();
@@ -26,14 +28,8 @@ module.exports = function(app: any) {
 
   Sources.init();
 
-  app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', checkLogin, privateLayerCheck, (req, res) =>{
 
-    var z = req.params.z;
-    var x = req.params.x;
-    var y =req.params.y;
-
-    var layer_id = req.params.layer_id;
-
+  var completeTileRequest = function(req, res, layer_id, z, x, y){
     Sources.getSource(layer_id)
     .then((result)=>{
       var source = result.source;
@@ -141,6 +137,49 @@ module.exports = function(app: any) {
       }else{
         log.error(err.message);
       }
+    });
+  };
+
+  app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', checkLogin, privateLayerCheck.middleware, (req, res) =>{
+
+    var z = req.params.z;
+    var x = req.params.x;
+    var y =req.params.y;
+
+    var layer_id = req.params.layer_id;
+    completeTileRequest(req, res, layer_id, z, x, y);
+  });
+
+  app.get('/tiles/lyr/:shortid/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', (req, res) =>{
+
+    var z = req.params.z;
+    var x = req.params.x;
+    var y =req.params.y;
+
+    var shortid = req.params.shortid;
+
+    var user_id = -1;
+    if(req.isAuthenticated && req.isAuthenticated() && req.session.user){
+      user_id = req.session.user.maphubsUser.id;
+    }
+
+    Layer.isSharedInPublicMap(shortid)
+    .then(isPublic => {
+        return Layer.getLayerByShortID(shortid).then(layer =>{
+          if(isPublic ||
+            (
+              manetCheck(req, res, true) && 
+              privateLayerCheck.check(layer.layer_id, user_id)
+            )
+          ){
+            return completeTileRequest(req, res, layer.layer_id, z, x, y);
+          }else{
+            return res.status(404).send();
+          }
+      });
+    }).catch((err)=>{
+      log.error(err.message);
+      res.status(404).send();
     });
   });
 };
