@@ -1,14 +1,14 @@
 //@flow
-var local = require('./local');
-var express = require('express');
-var consign = require('consign');
-var logger = require('morgan');
-var log = require('./services/log.js');
-var responseTime = require("response-time");
-var knex = require('./connection.js');
-var cookieParser = require('cookie-parser');
-var Raven = require('raven');
-var version = require('./package.json').version;
+const local = require('./local');
+const express = require('express');
+const consign = require('consign');
+const logger = require('morgan');
+const log = require('./services/log.js');
+const responseTime = require("response-time");
+const knex = require('./connection.js');
+const cookieParser = require('cookie-parser');
+const Raven = require('raven');
+const version = require('./package.json').version;
 
 require('babel-register')({});
 
@@ -42,9 +42,7 @@ var KnexSessionStore = require('connect-session-knex')(session);
 var passport = require('passport');
 //set sessions (Note: putting this below static files to avoid extra overhead)
 var sessionStore = new KnexSessionStore({
-  /*eslint-disable*/
-  knex: knex,
-  /*eslint-enable*/
+  knex,
   tablename: 'maphubssessions' // optional. Defaults to 'sessions'
 });
 

@@ -21,7 +21,7 @@ module.exports = {
   },
 
   getLayerByShortID(shortid: string) {
-    debug('getting layer: ' + shortid);
+    debug('getting layer by shortid: ' + shortid);
 
     return knex.select('layer_id', 'name', 'description', 'data_type', 'status', 'source',
                         'owned_by_group_id', 'last_updated', 'extent_bbox')
@@ -74,7 +74,7 @@ module.exports = {
   allowedToModify(layer_id: number, user_id: number){
     var _this = this;
     if(!layer_id || user_id <= 0){
-      return false;
+      return Promise.resolve(false);
     }
     return this.getLayerByID(layer_id)
       .then((layer)=>{

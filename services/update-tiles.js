@@ -1,11 +1,11 @@
 //@flow
-var tilelive = require('@mapbox/tilelive');
-var log = require('./log.js');
-var exec = require('child_process').exec;
-var Promise = require('bluebird');
-var local = require('../local');
-var TILE_PATH = local.tilePath ? local.tilePath : '/data';
-var fs = require('fs');
+const tilelive = require('@mapbox/tilelive');
+const log = require('./log.js');
+const exec = require('child_process').exec;
+const Promise = require('bluebird');
+const local = require('../local');
+const TILE_PATH = local.tilePath ? local.tilePath : '/data';
+const fs = require('fs');
 
 module.exports = function(source: Object, layer: Object, options: Object){
 
@@ -25,6 +25,7 @@ module.exports = function(source: Object, layer: Object, options: Object){
       });
     };
     var tilePath = TILE_PATH + '/' + layer.layer_id;
+    /* eslint-disable security/detect-non-literal-fs-filename */
     if (fs.existsSync(tilePath)) { 
       exec('rm -r ' + tilePath, (err, stdout, stderr) => {
       if(err){

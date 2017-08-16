@@ -131,8 +131,8 @@ var getLayer = function(layer_id: number){
 };
 
 
-var MaphubsSource = function(uri: Object, callback: Function) {
-  uri = url.parse(uri);
+var MaphubsSource = function(uriString: string, callback: Function) {
+  const uri: any = url.parse(uriString);
 
   //Ex: maphubs://layer/1
 
@@ -142,7 +142,7 @@ var MaphubsSource = function(uri: Object, callback: Function) {
 
   var id = uri.path.split('/')[1];
   if(uri.host === 'layer' && id){
-    var layer_id = id;
+    var layer_id: number = parseInt(id);
 
       return getLayer(layer_id)
        .then((layerXML)=>{
@@ -152,6 +152,7 @@ var MaphubsSource = function(uri: Object, callback: Function) {
            xmlString += xml(layerXML);
 
            if(local.writeDebugData){
+             /* eslint-disable security/detect-non-literal-fs-filename */
              fs.writeFile(local.tempFilePath + '/mapnik-' + layer_id + '.xml', xmlString, (err)=>{
                if(err) {
                  log.error(err);

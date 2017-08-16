@@ -4,7 +4,7 @@ var Layer = require('../models/layer');
 var privateLayerCheck = require('../services/private-layer-check').middleware;
 var local = require('../local');
 var log = require('../services/log.js');
-var updateTiles = require('../services/updateTiles');
+var updateTiles = require('../services/update-tiles');
 
 var checkLogin;
 var restrictCors = false;
@@ -37,10 +37,9 @@ module.exports = function(app: any) {
           if(!source){
             var msg = "Source not found for layer: " + layer_id;
             log.error(msg);
-            res.status(500).send(msg);
-            return;
-          }
-          var options = {
+            return res.status(500).send(msg);     
+          }else{
+            var options = {
               type: 'scanline',
               minzoom: 0,
               maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
@@ -53,8 +52,10 @@ module.exports = function(app: any) {
             return updateTiles(source, layer, options)
             .then(() => {
               return res.status(200).send({success: true});
-            });    
-        });
+            }); 
+          }
+             
+          });
         });
         }else{
           return res.status(401).send({

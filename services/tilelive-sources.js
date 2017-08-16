@@ -6,10 +6,10 @@ var debug = require('./debug')('tilelive-sources');
 var local = require('../local');
 var tilelive = require("@mapbox/tilelive");
 require('./tilelive-maphubs2')(tilelive);
-var fs = require('fs');
-var updateTiles = require('./updateTiles');
+var fs: typeof fs = Promise.promisifyAll(require("fs"));
+var updateTiles = require('./update-tiles');
 var TILE_PATH = local.tilePath ? local.tilePath : '/data';
-var lockFile = require('lockfile');
+var lockFile = Promise.promisifyAll(require('lockfile'));
 
 module.exports = {
   sources: {},
@@ -27,28 +27,19 @@ module.exports = {
     }else{
       return Layer.getLayerByID(layer_id)
       .then((layer)=>{
-        return new Promise((resolve, reject) =>{
         if(layer.last_updated > source.updated){    
           log.info('Source Update: ' +  source.updated + ' Layer Updated: ' + layer.last_updated);
           if(!source.updating){
             source.updating = true;
             //lockfile
             var lockfilePath = TILE_PATH + '/' + layer_id + '.lock'; 
-            lockFile.lock(lockfilePath, {}, (err) => {          
-              if(err){
-                //falied to acquire lock, another instance is updating this source
-                source.updating = false;
-                log.error(err);
-                resolve(source);
-              }else{
-                log.info('lockfile created at:' + lockfilePath);
+            return lockFile.lock(lockfilePath, {})
+            .then(()=>{
+              log.info('lockfile created at:' + lockfilePath);
                 //check metadata
                 var metadataPath = TILE_PATH + '/' + layer_id + '/updated.json';
-                fs.readFile(metadataPath, (err, data) => {
-                  if(err){
-                    //layer doesn't exist yet
-                    data = "{}";
-                  } 
+                return fs.readFileAsync(metadataPath)
+                .then(data=>{
                   log.info('opened metadata: ' + metadataPath);
                   var metadata = JSON.parse(data);
                   if(layer.last_updated !== metadata.updated){
@@ -63,57 +54,54 @@ module.exports = {
                       timeout: undefined,
                       close:true
                     };
-                    var updateTilesPromise = updateTiles(source, layer, options).then(()=>{
+                    return updateTiles(source, layer, options).then(()=>{
                       source.updating = false;
                       source.updated = layer.last_updated;
                       metadata.updated = layer.last_updated;
                       //update metadata
-                      return new Promise((resolve, reject)=>{
-                        fs.writeFile(metadataPath, JSON.stringify(metadata), (err)=>{
-                          if(err) {
+                      
+                      return fs.writeFileAsync(metadataPath, JSON.stringify(metadata))
+                      .then(()=>{
+                        //close lockfile
+                        return lockFile.unlock(lockfilePath, (err)=>{
+                          if(err){
                             source.updating = false;
-                            log.error(err);                 
-                          }
-                          //close lockfile
-                          lockFile.unlock(lockfilePath, (err)=>{
-                            if(err){
-                              source.updating = false;
-                              log.error(err);
-                              reject(err);
-                            } else{
-                              log.info('closed lockfile');
-                              resolve(source);
-                            }                         
-                          });
-                        });  
-                      });                                       
+                            log.error(err);
+                          } else{
+                            log.info('closed lockfile');
+                          }                         
+                        });
+                      }).catch(err=>{
+                        source.updating = false;
+                        log.error(err); 
+                      });                                      
                     });
-                    resolve(updateTilesPromise);
                   }else{
                     log.info('tiles already up to date, updating source object');
                     //the local source is just behind
                       source.updated = layer.last_updated;
-                      lockFile.unlock(lockfilePath, (err)=>{
-                        if(err){
-                          log.error(err);
-                          reject(err);
-                        }else{
-                          log.info('closed lockfile');
-                          resolve(source);
-                        } 
-                      });                   
+                      return lockFile.unlock(lockfilePath)
+                      .then(()=>{
+                        log.info('closed lockfile');
+                        return source;
+                      });                                     
                   }
-                });             
-              }             
-            });        
+                })
+                .catch(err=>{
+                  log.error(err);
+                });
+            }).catch(err=>{
+              source.updating = false;
+              log.error(err);
+              return source;
+            });                   
            }else{
-             log.warn('source already updating');
-            resolve(source);
+            log.warn('source already updating');
+            return source;
           }          
         }else{
-          resolve(source);
+          return source;
         }
-        });
       });     
     }
   },
@@ -181,6 +169,7 @@ module.exports = {
             initCommands.push(_this.loadSource(layer_id).
             then((source)=>{
                  //if tile files don't exist create them
+                 /* eslint-disable security/detect-non-literal-fs-filename */
                  if(!fs.existsSync(TILE_PATH + '/'+ layer_id)) {             
                   return Layer.getLayerByID(layer_id)
                   .then((layerObj)=>{

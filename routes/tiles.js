@@ -2,7 +2,6 @@
 var log = require('../services/log.js');
 var fs = require('fs');
 var Promise = require('bluebird');
-//var debug = require('../services/debug')('tiles');
 var Sources = require('../services/tilelive-sources');
 var mkdirp = require('mkdirp');
 var local = require('../local');
@@ -30,7 +29,7 @@ module.exports = function(app: any) {
 
 
   var completeTileRequest = function(req, res, layer_id, z, x, y){
-    Sources.getSource(layer_id)
+    return Sources.getSource(layer_id)
     .then((result)=>{
       var source = result.source;
       if(!source){
@@ -41,7 +40,8 @@ module.exports = function(app: any) {
       }
       if(source.updating){
         //if source is alreading updating in another request, just return tiles from the database
-         source.getTile(z, x, y, (err, newTileData, headers) => {
+        return new Promise((resolve)=>{
+          return source.getTile(z, x, y, (err, newTileData, headers) => {
                 if (err) {
                   res.status(404);
                   res.send(err.message);
@@ -50,12 +50,18 @@ module.exports = function(app: any) {
                 }else {             
                   res.set(headers);
                   res.status(200).send(newTileData);
+                  resolve();
                 }
               });
+        });
+         
       }else{
         var fileDir = TILE_PATH + '/' + layer_id + '/' + z + '/' + x;
         var filePath = fileDir + '/' + y + '.pbf';
 
+        return new Promise((resolve, reject)=>{
+        /* eslint-disable security/detect-non-literal-fs-filename */
+        // TILE_PATH is loaded from env, other params are parsed to integer
         fs.readFile(filePath, (err, data) => {
             if (err && err.code === 'ENOENT'){
                //didn't find the tile, so create it
@@ -86,15 +92,20 @@ module.exports = function(app: any) {
             }else if (err){
               //other reader error
               log.error(err.message);   
+              reject(err);
             }else{
               res.set({
                 'Content-Type': 'application/x-protobuf',
                 'Content-Encoding':'gzip'
               });
               res.status(200).send(data);
+              resolve();
             }
         });
+        /* eslint-enable security/detect-non-literal-fs-filename */
+      });
       }
+
       
     }).catch((err)=>{
       if(err.message === "pool is draining and cannot accept work"){
@@ -115,6 +126,7 @@ module.exports = function(app: any) {
                 }else {
                   var fileDir = TILE_PATH+ '/' + layer_id + '/' + z + '/' + x;
                   var filePath = fileDir + '/' + y + '.pbf';
+                  /* eslint-disable security/detect-non-literal-fs-filename */
                   mkdirp(fileDir, (err)=>{
                       if (err){
                         log.error(err);
@@ -132,7 +144,7 @@ module.exports = function(app: any) {
             });
         });
         }).catch((err) =>{
-          log.error("After Second Atempt: " + err.message);
+          log.error("After Second Attempt: " + err.message);
         });
       }else{
         log.error(err.message);
@@ -142,19 +154,19 @@ module.exports = function(app: any) {
 
   app.get('/tiles/layer/:layer_id(\\d+)/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', checkLogin, privateLayerCheck.middleware, (req, res) =>{
 
-    var z = req.params.z;
-    var x = req.params.x;
-    var y =req.params.y;
+    const z = parseInt(req.params.z);
+    const x = parseInt(req.params.x);
+    const y =parseInt(req.params.y);
 
-    var layer_id = req.params.layer_id;
+    const layer_id = parseInt(req.params.layer_id);
     completeTileRequest(req, res, layer_id, z, x, y);
   });
 
   app.get('/tiles/lyr/:shortid/:z(\\d+)/:x(\\d+)/:y(\\d+).pbf', (req, res) =>{
 
-    var z = req.params.z;
-    var x = req.params.x;
-    var y =req.params.y;
+    var z = parseInt(req.params.z);
+    var x = parseInt(req.params.x);
+    var y = parseInt(req.params.y);
 
     var shortid = req.params.shortid;
 
