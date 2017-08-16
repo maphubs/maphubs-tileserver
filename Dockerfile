@@ -7,7 +7,7 @@ MAINTAINER Kristofor Carle - MapHubs <kris@maphubs.com>
 
 #install dependencies
 RUN apt-get update && apt-get install -y curl libssl-dev openssl python build-essential g++ libpq-dev && \
-    curl -sL https://deb.nodesource.com/setup_6.x | bash && \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir -p /app
