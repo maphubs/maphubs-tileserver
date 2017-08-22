@@ -14,106 +14,101 @@ var lockFile = Promise.promisifyAll(require('lockfile'));
 module.exports = {
   sources: {},
 
-  getSource(layer_id: number){
+  async getSource(layer_id: number){
     var _this = this;
     var source = _this.sources['layer-' + layer_id];
     if(!source){
        //this will dynamically register new layers on this server the first time they are requested
-      return _this.loadSource(layer_id)
-      .then(()=>{
-          var source = _this.sources['layer-' + layer_id];
-          return source;
-      });
+      await _this.loadSource(layer_id);
+      return _this.sources['layer-' + layer_id];
     }else{
-      return Layer.getLayerByID(layer_id)
-      .then((layer)=>{
-        if(layer.last_updated > source.updated){    
-          log.info('Source Update: ' +  source.updated + ' Layer Updated: ' + layer.last_updated);
-          if(!source.updating){
-            source.updating = true;
-            //lockfile
+      const layer = await Layer.getLayerByID(layer_id);
+      if(layer.last_updated > source.updated){    
+        log.info('Source Update: ' +  source.updated + ' Layer Updated: ' + layer.last_updated);
+        if(!source.updating){
+          source.updating = true;
+          //lockfile
+          try{
             var lockfilePath = TILE_PATH + '/' + layer_id + '.lock'; 
-            return lockFile.lockAsync(lockfilePath, {})
-            .then(()=>{
-              log.info('lockfile created at:' + lockfilePath);
-                
-
-                var updateTilesHelper = function(source, layer, options, metadata){
-                return updateTiles(source, layer, options).then(()=>{
-                      source.updating = false;
-                      source.updated = layer.last_updated;
-                      metadata.updated = layer.last_updated;
-                      //update metadata
-                      
-                      return fs.writeFileAsync(metadataPath, JSON.stringify(metadata))
-                      .then(()=>{
-                        //close lockfile
-                        return lockFile.unlockAsync(lockfilePath)
-                        .then(()=>{
-                          log.info('closed lockfile');
-                          return source;
-                        }).catch(err=>{
-                          source.updating = false;
-                          log.error(err);
-                        });
-                      }).catch(err=>{
-                        source.updating = false;
-                        log.error(err); 
-                      });                                      
-                    });
-                };
-
-                var options = {
-                  type: 'scanline',
-                  minzoom: 0,
-                  maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
-                  bounds:layer.extent_bbox,
-                  retry: undefined,
-                  slow: undefined,
-                  timeout: undefined,
-                  close:true
-                };
-
-                //check metadata
-                var metadataPath = TILE_PATH + '/' + layer_id + '/metadata.json';
-
-                if(!fs.existsSync(metadataPath)){ 
-                  log.info('Updating Layer: ' + layer_id);    
-                  return updateTilesHelper(source, layer, options, {});
-                }else{
-
-                return fs.readFileAsync(metadataPath)
-                .then(data=>{
-                  log.info('opened metadata: ' + metadataPath);
-                  var metadata = JSON.parse(data);
-                  if(layer.last_updated !== metadata.updated){
-                    log.info('Updating Layer: ' + layer_id);                   
-                    return updateTilesHelper(source, layer, options, metadata);
-                  }else{
-                    log.info('tiles already up to date, updating source object');
-                    //the local source is just behind
-                      source.updated = layer.last_updated;
-                      return lockFile.unlockAsync(lockfilePath)
-                      .then(()=>{
-                        log.info('closed lockfile');
-                        return source;
-                      });                                     
-                  }
-                });
+            await lockFile.lockAsync(lockfilePath, {});
+            log.info('lockfile created at:' + lockfilePath);
+              
+            var updateTilesHelper = async function(source, layer, options, metadata){
+              try {
+                await updateTiles(source, layer, options);
+                source.updating = false;
+                source.updated = layer.last_updated;
+                metadata.updated = layer.last_updated;   
+              
+                //update metadata
+                await fs.writeFileAsync(metadataPath, JSON.stringify(metadata));
+                //close lockfile
+                await lockFile.unlockAsync(lockfilePath);
+                log.info('closed lockfile');
+                return source;
+                                         
+              }catch(err){
+                source.updating = false;
+                log.error(err);
+                //unlock if not already     
+                try{
+                if(fs.existsSync(lockfilePath)){   
+                  await lockFile.unlockAsync(lockfilePath);
+                  log.info('closed lockfile');
                 }
-            }).catch(err=>{
-              source.updating = false;
-              log.error(err);
-              return source;
-            });                   
-           }else{
-            log.warn('source already updating');
+                }catch(lockCloseErr){
+                  log.error(lockCloseErr);
+                }
+              }
+            };
+
+            var options = {
+              type: 'scanline',
+              minzoom: 0,
+              maxzoom: local.initMaxZoom ? local.initMaxZoom : 5,
+              bounds:layer.extent_bbox,
+              retry: undefined,
+              slow: undefined,
+              timeout: undefined,
+              close:true
+            };
+
+            //check metadata
+            var metadataPath = TILE_PATH + '/' + layer_id + '/metadata.json';
+
+              if(!fs.existsSync(metadataPath)){ 
+                log.info('Updating Layer: ' + layer_id);    
+                return updateTilesHelper(source, layer, options, {});
+              }else{
+
+              const data = await fs.readFileAsync(metadataPath);
+              log.info('opened metadata: ' + metadataPath);
+              var metadata = JSON.parse(data);
+              if(layer.last_updated !== metadata.updated){
+                log.info('Updating Layer: ' + layer_id);                   
+                return updateTilesHelper(source, layer, options, metadata);
+              }else{
+                log.info('tiles already up to date, updating source object');
+                //the local source is just behind
+                source.updated = layer.last_updated;
+                await lockFile.unlockAsync(lockfilePath);
+
+                log.info('closed lockfile');
+                return source;                                  
+              }
+            }                  
+          }catch(err){
+            source.updating = false;
+            log.error(err);
             return source;
-          }          
-        }else{
+          }        
+          }else{
+          log.warn('source already updating');
           return source;
-        }
-      });     
+        }          
+      }else{
+        return source;
+      } 
     }
   },
 
@@ -160,13 +155,11 @@ module.exports = {
   },
 
   //restart source to update it and clear tiles
-  restartSource(layer_id: number){
+  async restartSource(layer_id: number){
     log.info('restartSource: ' + layer_id);
     var _this = this;
-    return this.removeSource(layer_id)
-    .then(()=>{
-      return _this.loadSource(layer_id);
-    });
+    await this.removeSource(layer_id);
+    return _this.loadSource(layer_id);
   },
 
   init(){

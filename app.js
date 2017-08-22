@@ -10,7 +10,25 @@ const cookieParser = require('cookie-parser');
 const Raven = require('raven');
 const version = require('./package.json').version;
 
-require('babel-register')({});
+let babelConfig = {
+  presets: [
+    ["env", {
+      "targets": {
+        "node": true,
+    }
+    }],
+    "stage-0"
+  ],
+  plugins: ["transform-flow-strip-types"],
+  sourceMaps: false,
+  retainLines: false
+};
+
+if(process.env.NODE_ENV !== 'production'){
+  babelConfig.sourceMaps = true;
+  babelConfig.retainLines = true;
+}
+require('babel-register')(babelConfig);
 
 var app = express();
 app.enable('trust proxy');
