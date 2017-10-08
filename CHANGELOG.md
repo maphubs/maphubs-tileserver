@@ -1,5 +1,8 @@
 # Change Log
 
+## [v0.11.2](https://github.com/maphubs/maphubs-tileserver/tree/v0.11.2) (2017-10-08)
+[Full Changelog](https://github.com/maphubs/maphubs-tileserver/compare/v0.11.1...v0.11.2)
+
 ## [v0.11.1](https://github.com/maphubs/maphubs-tileserver/tree/v0.11.1) (2017-08-24)
 [Full Changelog](https://github.com/maphubs/maphubs-tileserver/compare/v0.11.0...v0.11.1)
 
