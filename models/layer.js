@@ -25,7 +25,8 @@ module.exports = {
 
     return knex.select('layer_id', 'name', 'description', 'data_type', 'status', 'source',
                         'owned_by_group_id', 'last_updated', 'extent_bbox')
-        .table('omh.layers').where({shortid})
+        .table('omh.layers')
+        .whereRaw('trim(shortid) = trim(?)', [shortid])
       .then((result) => {
         if (result && result.length === 1) {
           return result[0];
