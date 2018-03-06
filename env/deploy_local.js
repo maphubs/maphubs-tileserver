@@ -19,7 +19,6 @@ module.exports = {
   },
   requireLogin: process.env.OMH_REQUIRE_LOGIN == 'true',
   SESSION_SECRET:  process.env.OMH_SESSION_SECRET,
-  manetUrl: process.env.OMH_MANET_URL,
   manetAPIKey: process.env.OMH_MANET_API_KEY,
   SENTRY_DSN: process.env.OMH_SENTRY_DSN
 };
