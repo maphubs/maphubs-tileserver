@@ -1,31 +1,34 @@
-FROM ubuntu:16.04
+FROM oinuar/alpine-node-mapnik as base
 
-ENV DEBIAN_FRONTEND=noninteractive NODE_ENV=production
+LABEL maintainer="Kristofor Carle <kris@maphubs.com>"
 
-#MapHubs - Tile Server
-MAINTAINER Kristofor Carle - MapHubs <kris@maphubs.com>
+ENV NODE_ENV=production
 
-#install dependencies
-RUN apt-get update && apt-get install -y curl libssl-dev openssl python build-essential g++ libpq-dev && \
-    curl -sL https://deb.nodesource.com/setup_8.x | bash && \
-    apt-get install -y nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+RUN apk add --no-cache --upgrade apk-tools --repository http://nl.alpinelinux.org/alpine/edge/testing && \
+    apk add --no-cache gdal postgresql-dev libc6-compat --repository http://nl.alpinelinux.org/alpine/edge/testing && \
     mkdir -p /app
-
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && apt-get install -y yarn && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /app
 
-COPY package.json yarn.lock .snyk /app/
-RUN yarn install --production --pure-lockfile
+FROM base AS dependencies
 
-RUN npm run snyk-protect
+RUN apk add --no-cache make gcc g++ python 
 
-COPY . /app
-RUN chmod +x /app/docker-entrypoint.sh &&\
+COPY package.json .snyk /app/
+RUN npm install --production && \
+    npm run snyk-protect
+
+RUN cp -r /opt/node-mapnik/*  /app/node_modules/@mapbox/tilelive-bridge/node_modules/mapnik/
+
+FROM base AS release 
+COPY --from=dependencies /app /app
+COPY ./env /app/env
+COPY ./models /app/models
+COPY ./routes /app/routes
+COPY ./services /app/services
+COPY app.js connection.js docker-entrypoint.sh /app/
+
+RUN chmod +x /app/docker-entrypoint.sh && \
     cp /app/env/deploy_local.js  /app/local.js
 
 EXPOSE 4001
