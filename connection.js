@@ -1,4 +1,4 @@
-var connection = process.env.DATABASE_URL || require('./local').connection.url;
+var connection = process.env.DATABASE_URL || require('./local').connection.url
 var knex = require('knex')({
   client: 'pg',
   connection: connection,
@@ -10,6 +10,6 @@ var knex = require('knex')({
     min: 2,
     max: 25
   }
-});
+})
 
-module.exports = knex;
+module.exports = knex

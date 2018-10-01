@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "eslint": "node_modules/eslint/bin/eslint.js",
     "start": "DEBUG=*,-express:*,-babel,-morgan,-pool2,-knex:* node app.js",
     "changelog": "github_changelog_generator && git add CHANGELOG.md && git commit -m \"update changelog\" && git push",
     "preversion": "",

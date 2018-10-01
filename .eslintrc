@@ -1,7 +1,7 @@
 {
   "parser": "babel-eslint",
   "parserOptions": {
-    "ecmaVersion": 6,
+    "ecmaVersion": 8,
     "sourceType": "module",
     "ecmaFeatures": {
       "arrowFunctions": true,
@@ -29,23 +29,19 @@
     }
   },
   "extends": [
-    "eslint:recommended",
-    "plugin:promise/recommended",
+    "standard",
     "plugin:security/recommended",
     "plugin:unicorn/recommended"
   ],
   "rules": {
-    "generator-star-spacing": 1,
-    "babel/object-curly-spacing": 1,
-    "object-shorthand": 1,
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1,
-     "promise/no-nesting": "off",
-     "promise/avoid-new": "off",
-     "promise/no-callback-in-promise": "off",
-    "prefer-arrow-callback": 1,
-    "semi": [2, "always"],
-    "eqeqeq": 1 // require the use of === and !==
+    "security/detect-object-injection": "off",
+    "unicorn/filename-case": "off",
+    "camelcase": "off",
+    "object-curly-spacing": "off",
+    "standard/object-curly-even-spacing": [2, "either"],
+    "unicorn/catch-error-name": ["error", {"name": "err"}]
   },
 
   "env": {
@@ -54,7 +50,6 @@
   },
   "plugins": [
     "babel",
-    "promise",
     "flowtype",
      "security",
      "unicorn"
