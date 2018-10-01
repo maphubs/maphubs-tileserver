@@ -13,7 +13,8 @@
     "deploy-patch": "npm version patch --force -m \"version %s\"",
     "deploy-minor": "npm version minor --force -m \"version %s\"",
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublish": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "Kristofor Carle <kris@maphubs.com>",
   "license": "GPL-3.0",
@@ -44,7 +45,7 @@
     "pg-native": "^3.0.0",
     "raven": "^2.6.1",
     "response-time": "2.3.2",
-    "snyk": "^1.80.0",
+    "snyk": "^1.83.0",
     "tilelive-file": "0.0.3",
     "winston": "^3.1.0",
     "winston-daily-rotate-file": "^3.3.3",
