@@ -1,7 +1,6 @@
 // @flow
 const local = require('./local')
 const express = require('express')
-const consign = require('consign')
 const logger = require('morgan')
 const log = require('./services/log.js')
 const responseTime = require('response-time')
@@ -97,12 +96,10 @@ app.use((req, res, next) => {
 })
 
 // load all route files
-consign().include('./routes').into(app)
+require('./routes/tilejson')(app)
+require('./routes/updatetiles')(app)
+require('./routes/tiles')(app)
 
-var http = require('http')
-var server = http.createServer(app)
-server.setTimeout(10 * 60 * 1000) // 10 * 60 seconds * 1000 msecs
-server.listen(local.internal_port, () => {
-  log.info('**** STARTING SERVER ****')
-  log.info('Server Running on port: ' + local.internal_port)
+app.listen(local.internal_port, () => {
+  log.info(`Server running on port ${local.internal_port}`)
 })

@@ -5,6 +5,9 @@ LABEL maintainer="Kristofor Carle <kris@maphubs.com>"
 ENV NODE_ENV=production
 
 RUN apk add --no-cache --upgrade apk-tools --repository http://nl.alpinelinux.org/alpine/edge/testing && \
+    apk add --no-cache --virtual .crypto-rundeps \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+        libressl2.7-libcrypto && \
     apk add --no-cache gdal postgresql-dev libc6-compat --repository http://nl.alpinelinux.org/alpine/edge/testing && \
     mkdir -p /app
 
@@ -15,8 +18,7 @@ FROM base AS dependencies
 RUN apk add --no-cache make gcc g++ python 
 
 COPY package.json .snyk /app/
-RUN npm install --production && \
-    npm run snyk-protect
+RUN npm install --production
 
 RUN cp -r /opt/node-mapnik/*  /app/node_modules/@mapbox/tilelive-bridge/node_modules/mapnik/
 

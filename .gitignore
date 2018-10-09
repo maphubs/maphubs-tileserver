@@ -4,3 +4,4 @@ test-docker-image.sh
 temp
 npm-debug.log
 data
+logs
