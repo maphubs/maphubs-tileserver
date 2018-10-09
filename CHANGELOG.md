@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.12.1](https://github.com/maphubs/maphubs-tileserver/tree/v0.12.1) (2018-10-09)
+[Full Changelog](https://github.com/maphubs/maphubs-tileserver/compare/v0.12.0...v0.12.1)
+
+**Merged pull requests:**
+
+- \[Snyk\] Fix for 1 vulnerable dependencies [\#7](https://github.com/maphubs/maphubs-tileserver/pull/7) ([snyk-bot](https://github.com/snyk-bot))
+
 ## [v0.12.0](https://github.com/maphubs/maphubs-tileserver/tree/v0.12.0) (2018-05-13)
 [Full Changelog](https://github.com/maphubs/maphubs-tileserver/compare/v0.11.4...v0.12.0)
 
