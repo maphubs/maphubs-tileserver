@@ -1,6 +1,6 @@
 {
   "name": "maphubs-tileserver",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -26,17 +26,17 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
-    "bluebird": "3.5.2",
+    "bluebird": "^3.5.3",
     "compression": "1.7.3",
     "connect-session-knex": "^1.4.0",
     "cookie-parser": "1.4.3",
     "debug": "^4.0.1",
     "express": "^4.16.3",
     "express-session": "^1.15.5",
-    "knex": "0.15.2",
+    "knex": "^0.16.2",
     "lockfile": "1.0.4",
     "lodash.find": "4.6.0",
-    "mapnik": "/opt/node-mapnik",
+    "mapnik": "^4.0.2",
     "mkdirp": "0.5.1",
     "morgan": "^1.8.2",
     "passport": "^0.4.0",
@@ -62,7 +62,7 @@
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-unicorn": "^6.0.1",
-    "flow-bin": "0.81.0"
+    "flow-bin": "^0.89.0"
   },
   "snyk": true
 }
