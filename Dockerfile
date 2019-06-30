@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 RUN apk add --no-cache --upgrade apk-tools --repository http://nl.alpinelinux.org/alpine/edge/testing && \
     apk add --no-cache --virtual .crypto-rundeps \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
-        libressl2.7-libcrypto && \
+        libressl2.7-libcrypto libcrypto1.1 && \
     apk add --no-cache gdal postgresql-dev libc6-compat --repository http://nl.alpinelinux.org/alpine/edge/testing && \
     mkdir -p /app
 
