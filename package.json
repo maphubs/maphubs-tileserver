@@ -33,7 +33,7 @@
     "debug": "^4.0.1",
     "express": "^4.16.3",
     "express-session": "^1.15.5",
-    "knex": "^0.16.2",
+    "knex": "^0.19.5",
     "lockfile": "1.0.4",
     "lodash.find": "4.6.0",
     "mapnik": "^4.0.2",
