@@ -80,7 +80,7 @@ var getLayer = function (layer_id: number) {
                   {'Parameter': {_attr: {'name': 'host'}, _cdata: local.database.host}},
                   {'Parameter': {_attr: {'name': 'max_size'}, _cdata: '256'}},
                   {'Parameter': {_attr: {'name': 'password'}, _cdata: local.database.password}},
-                  {'Parameter': {_attr: {'name': 'port'}, _cdata: ''}},
+                  {'Parameter': {_attr: {'name': 'port'}, _cdata: local.database.port}},
                   {'Parameter': {_attr: {'name': 'table'}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from ' + tableName + ') data'}},
                   {'Parameter': {_attr: {'name': 'type'}, _cdata: 'postgis'}},
                   {'Parameter': {_attr: {'name': 'user'}, _cdata: local.database.user}}
@@ -114,7 +114,7 @@ var getLayer = function (layer_id: number) {
                 {'Parameter': {_attr: {'name': 'host'}, _cdata: local.database.host}},
                 {'Parameter': {_attr: {'name': 'max_size'}, _cdata: '256'}},
                 {'Parameter': {_attr: {'name': 'password'}, _cdata: local.database.password}},
-                {'Parameter': {_attr: {'name': 'port'}, _cdata: ''}},
+                {'Parameter': {_attr: {'name': 'port'}, _cdata: local.database.port}},
                 {'Parameter': {_attr: {'name': 'table'}, _cdata: '(select \'' + local.host + '\' as maphubs_host, * from layers.centroids_' + layer_id + ') data'}},
                 {'Parameter': {_attr: {'name': 'type'}, _cdata: 'postgis'}},
                 {'Parameter': {_attr: {'name': 'user'}, _cdata: local.database.user}}
