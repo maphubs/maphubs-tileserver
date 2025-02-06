@@ -1,4 +1,4 @@
-FROM quay.io/maphubs/tiles:v0.12.0
+FROM quay.io/maphubs/tiles:v0.12.1
 
 # patch the code files
 COPY ./env /app/env
